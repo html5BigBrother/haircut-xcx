@@ -1,9 +1,9 @@
 {
-	"miniprogramRoot": "./client/dist",
+	"miniprogramRoot": "client/dist/",
 	"cloudfunctionRoot": "cloud/functions/",
-	"projectname": "myApp",
+	"projectname": "haircut-xcx",
 	"description": "taro-haircut-xcx",
-	"appid": "touristappid",
+	"appid": "wxac13754a2931df56",
 	"setting": {
 		"urlCheck": false,
 		"es6": false,

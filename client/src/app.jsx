@@ -1,3 +1,4 @@
+import 'taro-ui/dist/style/index.scss'
 import Taro, { Component } from '@tarojs/taro'
 import Index from './pages/common/index/index'
 
@@ -15,6 +16,10 @@ class App extends Component {
     if (process.env.TARO_ENV === 'weapp') {
       Taro.cloud.init()
     }
+    Taro.cloud.init({
+      env: 'demo-q37go',
+      traceUser: true    
+    })
   }
 
   componentDidShow () {}
@@ -31,6 +36,7 @@ class App extends Component {
       {
         root: 'pages/customer',
         pages: [
+          'login/login',
           'index/index'
         ]
       },
