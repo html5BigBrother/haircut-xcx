@@ -37,7 +37,9 @@ class App extends Component {
         root: 'pages/customer',
         pages: [
           'login/login',
-          'index/index'
+          'index/index',
+          'user_edit/user_edit',
+          'bussiness_detail/bussiness_detail'
         ]
       },
       {

@@ -1,9 +1,12 @@
 import Taro, { Component } from '@tarojs/taro'
-import { View, Text, Image } from '@tarojs/components'
-import { AtTabBar, AtIcon, AtDivider } from 'taro-ui'
+import { View, Text, Image, Button } from '@tarojs/components'
+import { AtTabBar, AtIcon, AtDivider, AtAvatar } from 'taro-ui'
 import './index.styl'
 
+import { navigateTo } from '../../../utils/util'
+
 import icon_logo from '../../../static/imgs/icon.jpg'
+import icon_nouser from '../../../static/imgs/icon_nouser.svg'
 
 export default class Index extends Component {
 
@@ -28,7 +31,12 @@ export default class Index extends Component {
 
   componentWillMount () { }
 
-  componentDidMount () { }
+  componentDidMount () {
+    let current = this.$router.params.current ? Number(this.$router.params.current) : 0
+    this.setState({
+      current
+    })
+  }
 
   componentWillUnmount () { }
 
@@ -40,33 +48,44 @@ export default class Index extends Component {
     navigationBarTitleText: '快预约',
   }
 
-  onClickLogin() {
-    Taro.navigateTo({ url: '/pages/customer/index/index' })
-  }
   onClickTabBar(value) {
     this.setState({
       current: value
     })
   }
 
+  // 前往商户详情页
+  onClickToBusinessDetail() {
+    navigateTo('/pages/customer/bussiness_detail/bussiness_detail', { businessName: '乔治爱不释手' })
+  }
+
+  // 修改姓名
+  onClickToUserEdit() {
+    navigateTo('/pages/customer/user_edit/user_edit', { name: 'hahah' })
+  }
+
+  // 退出
+  onClickQuit() {}
+
+  // 商家类表dom
   renderBusinessList() {
     const { businessList } = this.state
     return (
       <View className='p-section-business'>
         <View className='u-title'>商家列表</View>
-        <View className='p-list-business'>
+        <View className='list-style-sheet1 p-list-business'>
           {
-            businessList.map((item) => 
-              <View className='u-item' key={item.id}>
-                <Image className='u-item-image' src={icon_logo}></Image>
-                <View className='flex-1'>
-                  <View className='u-item-text-1'>
-                    <Text style={`margin-right: ${Taro.pxTransform(12)};`}>item.name</Text>
-                    <AtIcon value='check-circle' color='#30CB9B' size={14}></AtIcon>
-                  </View>
-                  <View className='u-item-text-2'>滨江区星光大道B座2楼</View>
-                  <View className='u-item-text-2'>
-                    <Text decode>营业时间&emsp;09:00-21:00</Text>
+            businessList.map((item) =>
+              <View className='sheet1-item-wrap' key={item.id} hoverClass='view-hover' onClick={this.onClickToBusinessDetail}>
+                <View className='sheet1-item'>
+                  <Image className='sheet1-item-image' src={icon_logo}></Image>
+                  <View className='sheet1-item-content'>
+                    <View className='sheet1-item-text-1'>
+                      <Text style={`margin-right: ${Taro.pxTransform(12)};`}>item.name</Text>
+                      <AtIcon value='check-circle' color='#30CB9B' size={14}></AtIcon>
+                    </View>
+                    <View className='sheet1-item-text-2'>滨江区星光大道B座2楼</View>
+                    <View className='sheet1-item-text-2'>营业时间 09:00-21:00</View>
                   </View>
                 </View>
               </View>
@@ -78,6 +97,7 @@ export default class Index extends Component {
     )
   }
 
+  // 预约记录dom
   renderOrderList() {
     const { orderList } = this.state
     return (
@@ -113,10 +133,37 @@ export default class Index extends Component {
     )
   }
 
+  // 我的dom
   renderUser() {
     return (
-      <View className='p-'>
-        
+      <View className='p-section-user'>
+        <View className='p-user-detail'>
+          <AtAvatar
+            size='large'
+            circle
+            openData={
+              {
+                type: 'userAvatarUrl',
+                'default-avatar': icon_nouser
+              }
+            }
+          >
+          </AtAvatar>
+          <View className='u-detail-info'>
+            <View className='u-detail-name'>严天宇</View>
+            <View className='u-detail-phone'>电话：15757179448</View>
+          </View>
+        </View>
+        <View className='p-operation-list'>
+          <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit}>
+            <View className='u-item-name'>姓名</View>
+            <View className='u-item-value'>ZP</View>
+            <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
+          </View>
+        </View>
+        <View className='p-bottom-btn'>
+          <Button className='btn-style btn-default u-btn' hoverClass='btn-hover' onClick={this.onClickQuit}>退出登录</Button>
+        </View>
       </View>
     )
   }
@@ -135,6 +182,7 @@ export default class Index extends Component {
         </View>
         <AtTabBar
           fixed
+          className='p-tab-bar'
           color='#888888'
           selectedColor='#EC8140'
           backgroundColor='#FAFAFA'
