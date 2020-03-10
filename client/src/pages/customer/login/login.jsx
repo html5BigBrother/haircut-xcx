@@ -40,9 +40,6 @@ export default class Login extends Component {
 
   config = {
     navigationBarTitleText: '登录',
-    usingComponents: {
-      'mp-half-screen-dialog': '../../../components/half-screen-dialog/half-screen-dialog/half-screen-dialog'
-    }
   }
 
   onClickLogin() {
@@ -90,12 +87,6 @@ export default class Login extends Component {
           <Button className='btn-style btn-primary u-btn' hoverClass='btn-hover' onClick={this.onClickLogin}>手机号登录</Button>
           <Button className='btn-style btn-default u-btn' hoverClass='btn-hover'>取消</Button>
         </View>
-        {/* <mp-half-screen-dialog closabled={false} subTitle='哈哈哈' desc='desc' tips='tips' show={this.state.show} buttons={this.state.buttons}
-          renderTitle={
-            <View>你好啊哈哈哈的法萨芬的三</View>
-          }
-        >
-        </mp-half-screen-dialog> */}
       </View>
     )
   }
