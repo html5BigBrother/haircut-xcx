@@ -162,7 +162,7 @@ export default class Index extends Component {
           </View>
         </View>
         <View className='p-bottom-btn'>
-          <Button className='btn-style btn-default u-btn' hoverClass='btn-hover' onClick={this.onClickQuit}>退出登录</Button>
+          <Button className='btn-style btn-default btn-large btn-circle-44 u-btn' hoverClass='btn-hover' onClick={this.onClickQuit}>退出登录</Button>
         </View>
       </View>
     )

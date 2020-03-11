@@ -1,6 +1,6 @@
 import Taro, { Component } from '@tarojs/taro'
-import { View, Text, Image, Button } from '@tarojs/components'
-import { AtIcon, AtDivider, AtFloatLayout } from 'taro-ui'
+import { View, Text, Image, Button, Label, Checkbox, CheckboxGroup, Navigator } from '@tarojs/components'
+import { AtIcon, AtFloatLayout, AtCalendar } from 'taro-ui'
 import './bussiness_detail.styl'
 
 // import { navigateTo } from '../../../utils/util'
@@ -15,11 +15,23 @@ export default class BussinessDetail extends Component {
     super(props)
     this.state = {
       layoutShow: false,
+      isOpened: false,
       goodsList: [
         { name: '桥主' },
         { name: '主力' },
         { name: '哈尼' },
         { name: '三地' }
+      ],
+      orderInfo: {
+        currentDate: '',
+        checkedProtocol: true,
+      },
+      checkList: [
+        { value: '9:00', disabled: false, checked: false },
+        { value: '9:00', disabled: false, checked: false },
+        { value: '9:00', disabled: false, checked: false },
+        { value: '9:00', disabled: false, checked: false },
+        { value: '9:00', disabled: false, checked: false },
       ]
     }
   }
@@ -44,12 +56,42 @@ export default class BussinessDetail extends Component {
     Taro.makePhoneCall({ phoneNumber: '15757179448' })
   }
 
-  onClickDialogShow() {
+  onClickDialogShow(item) {
     this.onChangeShow(true)
   }
 
   onChangeShow(layoutShow) {
     this.setState({ layoutShow })
+  }
+
+  onChangeIsOpened(isOpened) {
+    this.setState({ isOpened })
+  }
+
+  onChangeCheckedProtocol(e) {
+    let { orderInfo } = this.state
+    orderInfo.checkedProtocol = e.detail.value.length > 0
+    this.setState({ orderInfo })
+  }
+
+  onChangeCheckedList(e) {
+    let { checkList } = this.state
+    const valueList = e.detail.value
+    checkList.forEach((item, index) => {
+      const indexStr = String(index)
+      if (true) item.checked = !!(valueList.length > 0 && valueList[valueList.length -1].indexOf(indexStr) > -1)
+      else item.checked = valueList.indexOf(indexStr) > -1
+    })
+    this.setState({ checkList })
+  }
+
+  onSelectDate(e) {
+    let { orderInfo } = this.state
+    orderInfo.currentDate = e.value.start
+    this.setState({
+      orderInfo,
+      isOpened: false
+    })
   }
 
   renderBusiness() {
@@ -108,6 +150,7 @@ export default class BussinessDetail extends Component {
   }
   
   renderOrderDetail() {
+    const { orderInfo, checkList } = this.state
     return (
       <View className='p-order-detail'>
         <View className='u-order-head'>
@@ -116,22 +159,74 @@ export default class BussinessDetail extends Component {
             <View className='u-title-icon'><AtIcon value='check-circle' color='#30CB9B' size={14}></AtIcon></View>
             <View className='text-style-2'>近7日体温</View>
           </View>
+          <View className='u-temperature-chart'></View>
+        </View>
+        <View className='u-order-body'>
+          <View className='u-date-choose' onClick={this.onChangeIsOpened.bind(this, true)}>
+            { orderInfo.currentDate ? this.renderDate() : <View className='flex-1 color-888'>请选择日期</View> }
+            <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
+          </View>
+          <View className='u-body-section'>
+            <View className='check-list-style'>
+              <CheckboxGroup onChange={this.onChangeCheckedList.bind(this)}>
+                {
+                  checkList.map((item, index) => 
+                    <Label className={`u-label ${item.disabled && 'disabled'} ${item.checked && 'checked'}`} key={index}>
+                      <Checkbox className='u-checkbox' value={index} disabled={item.disabled} checked={item.checked}></Checkbox>
+                      <Text>09:00</Text>
+                    </Label>
+                  )
+                }
+              </CheckboxGroup>
+            </View>
+          </View>
+          <View className='u-body-section'>
+            <View></View>
+          </View>
+        </View>
+        <View className='u-order-foot'>
+          <Button className='btn-style btn-orange btn-large btn-circle-44' hoverClass='btn-hover' disabled onClick={this.onClickQuit}>立即预约</Button>
+          <CheckboxGroup onChange={this.onChangeCheckedProtocol}>
+            <View className='p-checkbox-protocol'>
+              <Label className='u-label'>
+                <Checkbox className='u-checkbox' color='#EC8140' checked={orderInfo.checkedProtocol}></Checkbox>
+                <Text className='color-888'>已阅读协议</Text>
+              </Label>
+              <Navigator className='u-link' url='/pages/customer/user_edit/user_edit'>《协议链接》</Navigator>
+            </View>
+          </CheckboxGroup>
         </View>
       </View>
     )
   }
 
+  renderDate() {
+    const { orderInfo } = this.state
+    const currentDate = orderInfo.currentDate
+    const dateTranslateWeek = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    const yearMonthDay = `${new Date(currentDate).getFullYear()}年${new Date(currentDate).getMonth() + 1}月${new Date(currentDate).getDate()}日 `
+    const weekDay = dateTranslateWeek[new Date(currentDate).getDay()]
+    return (
+      <View className='flex-1'>
+        <Text className='color-222'>{yearMonthDay}</Text>
+        <Text className='color-888'>{weekDay}</Text>
+      </View>
+    )
+  }
+
   render () {
-    const { layoutShow } = this.state
+    const { layoutShow, orderInfo } = this.state
     return (
       <View className='p-page'>
         <View className='p-contain'>
           { this.renderBusiness() }
           { this.renderGoods() }
-          {/* <AtFloatLayout isOpened>范德萨范德萨的法萨芬的三法术范德萨</AtFloatLayout> */}
           <HalfScreenLayout show={layoutShow} onChangeShow={this.onChangeShow.bind(this)}>
             { this.renderOrderDetail() }
           </HalfScreenLayout>
+          <AtFloatLayout isOpened={this.state.isOpened} onClose={this.onChangeIsOpened.bind(this, false)}>
+            <AtCalendar currentDate={orderInfo.currentDate} minDate={Date.now() - 1000 * 60 * 60 * 24} maxDate={Date.now() + 1000 * 60 * 60 * 24 * 60} onSelectDate={this.onSelectDate.bind(this)} />
+          </AtFloatLayout>
         </View>
       </View>
     )
