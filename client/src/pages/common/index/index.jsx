@@ -3,7 +3,6 @@ import { View, Text } from '@tarojs/components'
 import './index.styl'
 
 // import { set as setGlobalData, get as getGlobalData } from '../../../utils/global_data'
-import Login from '../../../components/login/index'
 
 export default class Index extends Component {
 
@@ -15,7 +14,7 @@ export default class Index extends Component {
   componentWillMount () { }
 
   componentDidMount () {
-    Taro.navigateTo({ url: '/pages/customer/login/login' })
+    Taro.navigateTo({ url: '/pages/business/index/index' })
    }
 
   componentWillUnmount () { }
@@ -32,7 +31,9 @@ export default class Index extends Component {
     console.log(process.env.NODE_ENV)
     return (
       <View className='p-page'>
-        <Login />
+        <View className='p-contain'>
+          
+        </View>
       </View>
     )
   }

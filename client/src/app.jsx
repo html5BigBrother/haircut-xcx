@@ -45,6 +45,7 @@ class App extends Component {
       {
         root: 'pages/business',
         pages: [
+          'login/login',
           'index/index'
         ]
       },

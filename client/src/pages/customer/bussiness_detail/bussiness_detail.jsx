@@ -8,6 +8,8 @@ import './bussiness_detail.styl'
 import icon_logo from '../../../static/imgs/icon.jpg'
 
 import HalfScreenLayout from '../../../components/half-screen-layout/half-screen-layout'
+import LineCharts from '../../../components/line-charts/line-charts'
+import CheckList from '../../../components/check-list/check-list'
 
 export default class BussinessDetail extends Component {
 
@@ -32,7 +34,14 @@ export default class BussinessDetail extends Component {
         { value: '9:00', disabled: false, checked: false },
         { value: '9:00', disabled: false, checked: false },
         { value: '9:00', disabled: false, checked: false },
-      ]
+      ],
+      checkList2: [
+        { value: '9:00', disabled: false, checked: false },
+        { value: '9:00', disabled: false, checked: false },
+        { value: '9:00', disabled: false, checked: false },
+        { value: '9:00', disabled: false, checked: false },
+        { value: '9:00', disabled: false, checked: false },
+      ],
     }
   }
 
@@ -50,7 +59,53 @@ export default class BussinessDetail extends Component {
 
   config = {
     navigationBarTitleText: '快预约',
+    "usingComponents": {
+      "ec-canvas": "../../../components/ec-canvas/ec-canvas"
+    }
   }
+
+  refLineChart = (node) => this.lineChart = node
+
+  initChart() {
+    const option = {
+      grid: {
+        left: '0',
+        right: '3%',
+        top: '8%',
+        bottom: '0',
+        borderColor: '#BFBFBF',
+        containLabel: true
+      },
+      xAxis: [
+        {
+          type: 'category',
+          boundaryGap: false,
+          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+        }
+      ],
+      yAxis: [
+        {
+          type: 'value'
+        }
+      ],
+      series: [
+        {
+          name: '体温折线图',
+          type: 'line',
+          stack: '总量',
+          label: {
+            normal: {
+              show: true,
+              position: 'top'
+            }
+          },
+          data: [820, 932, 901, 934, 1290, 1330, 1320]
+        }
+      ]
+    }
+    this.lineChart.refresh(option)
+  }
+
 
   onClickPhone() {
     Taro.makePhoneCall({ phoneNumber: '15757179448' })
@@ -58,6 +113,7 @@ export default class BussinessDetail extends Component {
 
   onClickDialogShow(item) {
     this.onChangeShow(true)
+    this.initChart()
   }
 
   onChangeShow(layoutShow) {
@@ -72,17 +128,6 @@ export default class BussinessDetail extends Component {
     let { orderInfo } = this.state
     orderInfo.checkedProtocol = e.detail.value.length > 0
     this.setState({ orderInfo })
-  }
-
-  onChangeCheckedList(e) {
-    let { checkList } = this.state
-    const valueList = e.detail.value
-    checkList.forEach((item, index) => {
-      const indexStr = String(index)
-      if (true) item.checked = !!(valueList.length > 0 && valueList[valueList.length -1].indexOf(indexStr) > -1)
-      else item.checked = valueList.indexOf(indexStr) > -1
-    })
-    this.setState({ checkList })
   }
 
   onSelectDate(e) {
@@ -150,7 +195,7 @@ export default class BussinessDetail extends Component {
   }
   
   renderOrderDetail() {
-    const { orderInfo, checkList } = this.state
+    const { orderInfo, checkList, checkList2 } = this.state
     return (
       <View className='p-order-detail'>
         <View className='u-order-head'>
@@ -159,7 +204,9 @@ export default class BussinessDetail extends Component {
             <View className='u-title-icon'><AtIcon value='check-circle' color='#30CB9B' size={14}></AtIcon></View>
             <View className='text-style-2'>近7日体温</View>
           </View>
-          <View className='u-temperature-chart'></View>
+          <View className='u-temperature-chart'>
+            <LineCharts ref={this.refLineChart} />
+          </View>
         </View>
         <View className='u-order-body'>
           <View className='u-date-choose' onClick={this.onChangeIsOpened.bind(this, true)}>
@@ -167,21 +214,10 @@ export default class BussinessDetail extends Component {
             <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
           </View>
           <View className='u-body-section'>
-            <View className='check-list-style'>
-              <CheckboxGroup onChange={this.onChangeCheckedList.bind(this)}>
-                {
-                  checkList.map((item, index) => 
-                    <Label className={`u-label ${item.disabled && 'disabled'} ${item.checked && 'checked'}`} key={index}>
-                      <Checkbox className='u-checkbox' value={index} disabled={item.disabled} checked={item.checked}></Checkbox>
-                      <Text>09:00</Text>
-                    </Label>
-                  )
-                }
-              </CheckboxGroup>
-            </View>
+            <CheckList selectSingle checkList={checkList} onSelectedCheck={(option) => { this.setState({ checkList: option.checkList }) }} />
           </View>
           <View className='u-body-section'>
-            <View></View>
+            <CheckList checkList={checkList2} onSelectedCheck={(option) => { this.setState({ checkList2: option.checkList }) }} />
           </View>
         </View>
         <View className='u-order-foot'>
@@ -224,10 +260,10 @@ export default class BussinessDetail extends Component {
           <HalfScreenLayout show={layoutShow} onChangeShow={this.onChangeShow.bind(this)}>
             { this.renderOrderDetail() }
           </HalfScreenLayout>
-          <AtFloatLayout isOpened={this.state.isOpened} onClose={this.onChangeIsOpened.bind(this, false)}>
-            <AtCalendar currentDate={orderInfo.currentDate} minDate={Date.now() - 1000 * 60 * 60 * 24} maxDate={Date.now() + 1000 * 60 * 60 * 24 * 60} onSelectDate={this.onSelectDate.bind(this)} />
-          </AtFloatLayout>
         </View>
+        <AtFloatLayout isOpened={this.state.isOpened} onClose={this.onChangeIsOpened.bind(this, false)}>
+          <AtCalendar currentDate={orderInfo.currentDate} minDate={Date.now() - 1000 * 60 * 60 * 24} maxDate={Date.now() + 1000 * 60 * 60 * 24 * 60} onSelectDate={this.onSelectDate.bind(this)} />
+        </AtFloatLayout>
       </View>
     )
   }
