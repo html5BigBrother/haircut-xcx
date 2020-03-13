@@ -1,0 +1,44 @@
+
+
+.p-list
+  font-size 28px
+  color #222
+  .u-head
+    display flex
+    align-items center
+    height 92px
+    background #F6F6F6
+    padding 0 40px
+  .u-title
+    font-size 32px
+  .u-item-date
+    display flex
+    align-items center
+    height 92px
+    background #F6F6F6
+    padding 0 40px
+    border-top 2px solid #F2F2F2
+    border-bottom 2px solid #F2F2F2
+  .u-item-temperature
+    display flex
+    align-items center
+    height 92px
+    border-bottom 2px solid #F2F2F2
+    margin-left 40px
+    padding-right 40px
+    &:last-child
+      border-bottom 0
+
+  .u-chevron
+    transition all 0.5s
+    transform rotateZ(0)
+    &.active
+      transform rotateZ(90deg)
+  .u-temperature-list
+    overflow-y auto
+    max-height 0
+    transition max-height 0.5s
+    &.active
+      max-height 470px
+  
+

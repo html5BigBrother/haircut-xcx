@@ -51,7 +51,7 @@ export default class Index extends Component {
 
   // 修改姓名
   onClickToUserEdit() {
-    navigateTo('/pages/customer/user_edit/user_edit', { name: 'hahah' })
+    navigateTo('/pages/business/user_edit/user_edit', { name: 'hahah', type: '1' })
   }
 
   // 退出
@@ -99,29 +99,35 @@ export default class Index extends Component {
     return (
       <View className='p-section-user'>
         <View className='p-user-detail'>
-          <AtAvatar
-            size='large'
-            openData={
-              {
-                type: 'userAvatarUrl',
-                'default-avatar': icon_nouser
-              }
-            }
-          >
-          </AtAvatar>
+          <Image className='u-image-business' src={icon_logo} />
           <View className='u-detail-info'>
             <View className='u-detail-name'>严天宇</View>
             <View className='u-detail-phone'>
-              <AtIcon value='map-pin' color='#888' size={12}></AtIcon>
-              <Text>浙江省杭州市滨江区江南大道…</Text>
+              <Image className='u-icon-1' src={icon_logo} />
+              <Text className='u-text-over'>浙江省杭州市滨江区江南大道…</Text>
             </View>
-            <View className='u-detail-phone'>电话：15757179448</View>
+            <View className='u-detail-phone'>
+              <Image className='u-icon-2' src={icon_logo} />
+              <Text decode>09:00-21:00&emsp;</Text>
+              <Image className='u-icon-3' src={icon_logo} />
+              <Text>15000000000</Text>
+            </View>
           </View>
         </View>
         <View className='p-operation-list'>
           <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit}>
-            <View className='u-item-name'>姓名</View>
-            <View className='u-item-value'>ZP</View>
+            <View className='u-item-name'>商户名称</View>
+            <View className='u-item-value'>乔治</View>
+            <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
+          </View>
+          <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit}>
+            <View className='u-item-name'>地址</View>
+            <View className='u-item-value'>浙江省杭州市滨江区江南大范德萨范德萨放大</View>
+            <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
+          </View>
+          <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit}>
+            <View className='u-item-name'>营业时间</View>
+            <View className='u-item-value'>09:00-21:00</View>
             <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
           </View>
         </View>
@@ -149,7 +155,7 @@ export default class Index extends Component {
           fixed
           className='p-tab-bar'
           color='#888888'
-          selectedColor='#299FEE'
+          selectedColor='#7B8FFF'
           backgroundColor='#FAFAFA'
           tabList={[
             { title: '主页', iconType: 'home', },

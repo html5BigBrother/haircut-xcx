@@ -38,6 +38,28 @@
     color #888888
     font-size 28px
     line-height 28px
+    display flex
+    align-items center
+    max-height 440px
+    &+.u-detail-phone
+      margin-top 16px
+  .u-text-over
+    max-width 400px
+    text-overflow ellipsis
+    white-space nowrap
+    overflow hidden
+  .u-image-business
+    width 136px
+    height 136px
+  .u-icon-1
+    width 32px
+    height 32px
+  .u-icon-2
+    width 32px
+    height 32px
+  .u-icon-3
+    width 32px
+    height 32px
 
 // 我的 页面
 .p-operation-list
@@ -51,10 +73,15 @@
     border-bottom 16px solid #F2F2F2
     &:first-child
       border-top 16px solid #F2F2F2
+  .u-item-name
+    width 190px
   .u-item-value
     flex 1
     text-align right
     margin-right 16px
+    text-overflow ellipsis
+    white-space nowrap
+    overflow hidden
 .p-bottom-btn
   position absolute
   bottom 128px

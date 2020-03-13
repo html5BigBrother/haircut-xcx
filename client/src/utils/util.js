@@ -1,5 +1,6 @@
 import Taro from '@tarojs/taro'
 
+// 路由
 function queryFromObjectToString(url, query) {
   let queryStr = ''
   if (query) {
@@ -22,4 +23,23 @@ export function redirectTo(url, query) {
 
 export function reLaunch(url, query) {
   Taro.reLaunch({ url: queryFromObjectToString(url, query) })
+}
+
+// 弹框
+export function showModal({ title, content, showCancel, confirmText, cancelText, confirmColor, cancelColor }) {
+  return new Promise(function (resolve) {
+    Taro.showModal({
+      title: title || '提示',
+      content: content || '提示',
+      showCancel: showCancel !== false,
+      confirmText: confirmText || '确定',
+      cancelText: cancelText || '取消',
+      confirmColor: confirmColor || '#3CC51F',
+      cancelColor: cancelColor || '#353535',
+      success(res) {
+        if (res.confirm) resolve(true)
+        else if (res.cancel) resolve(false)
+      }
+    })
+  })
 }

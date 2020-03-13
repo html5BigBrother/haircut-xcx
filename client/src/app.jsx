@@ -46,7 +46,11 @@ class App extends Component {
         root: 'pages/business',
         pages: [
           'login/login',
-          'index/index'
+          'index/index',
+          'user_edit/user_edit',
+          'staff_add/staff_add',
+          'staff_temperature/staff_temperature',
+          'staff_temperature_history/staff_temperature_history'
         ]
       },
     ],

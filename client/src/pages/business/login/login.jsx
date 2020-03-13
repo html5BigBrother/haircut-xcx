@@ -2,6 +2,7 @@ import Taro, { Component } from '@tarojs/taro'
 import { View, Button, Input, Picker } from '@tarojs/components'
 import './login.styl'
 
+import { showModal, redirectTo } from '../../../utils/util'
 
 export default class Login extends Component {
 
@@ -40,9 +41,7 @@ export default class Login extends Component {
     this.setState({ endTime })
   }
 
-  onClickCreate() {
-
-    Taro.navigateTo({ url: '/pages/business/index/index' })
+  async onClickCreate() {
 
     // Taro.cloud.callFunction({
     //   name: 'customerRegiste',
@@ -56,6 +55,14 @@ export default class Login extends Component {
 
     //   }
     // })
+
+    if(await showModal({
+      title: '创建完成',
+      content: '前往「员工管理」页面编辑您的员工',
+      showCancel: false,
+      confirmText: '前往',
+      confirmColor: '#7B8FFF'
+    })) redirectTo('/pages/business/staff_add/staff_add')
   }
 
   render () {
@@ -90,7 +97,7 @@ export default class Login extends Component {
             </View>
           </View>
           <View className='u-foot'>
-            <Button className='btn-style btn-blue btn-large btn-circle-44 u-btn' hoverClass='btn-hover' onClick={this.onClickCreate}>完成</Button>
+            <Button className='btn-style btn-purple btn-large btn-circle-44 u-btn' hoverClass='btn-hover' onClick={this.onClickCreate}>完成</Button>
           </View>
         </View>
       </View>

@@ -19,7 +19,8 @@
 			"ignore": [],
 			"disablePlugins": [],
 			"outputPath": ""
-		}
+		},
+		"enhance": false
 	},
 	"compileType": "miniprogram",
 	"simulatorType": "wechat",
