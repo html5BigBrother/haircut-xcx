@@ -1,8 +1,11 @@
 import Taro, { Component } from '@tarojs/taro'
 import { View, Button, Input, Picker } from '@tarojs/components'
+import { AtMessage } from 'taro-ui'
 import './login.styl'
 
+import validate from '../../../utils/validate'
 import { showModal, redirectTo } from '../../../utils/util'
+import cloudRequest from '../../../utils/request_cloud'
 
 export default class Login extends Component {
 
@@ -10,10 +13,12 @@ export default class Login extends Component {
     super(props)
     this.state = {
       regionValue: [],
-      rangeStartTime: ['9:00', '10:00', '11:00'],
-      rangeEndTime: ['9:00', '10:00', '11:00'],
-      startTime: '',
-      endTime: ''
+      rangeTime: ['9:00', '10:00', '11:00'],
+      startTime: '', // 营业开始时间
+      endTime: '', // 营业截止时间
+      name: '', // 商户美国昵称
+      phone: '', // 商户手机号
+      address: '', // 商户地址
     }
   }
 
@@ -22,8 +27,7 @@ export default class Login extends Component {
   }
 
   onChangeInput(valueName, e) {
-    console.log(valueName)
-    console.log(e)
+    this.setState({ [`${valueName}`]: e.detail.value })
   }
 
   onChangeRegion(e) {
@@ -32,29 +36,47 @@ export default class Login extends Component {
   }
 
   onChangeStartTime(e) {
-    const startTime = this.state.rangeStartTime[e.detail.value]
+    const startTime = this.state.rangeTime[e.detail.value]
     this.setState({ startTime })
   }
 
   onChangeEndTime(e) {
-    const endTime = this.state.rangeEndTime[e.detail.value]
+    const endTime = this.state.rangeTime[e.detail.value]
     this.setState({ endTime })
   }
 
   async onClickCreate() {
-
-    // Taro.cloud.callFunction({
-    //   name: 'customerRegiste',
-    //   // 传给云函数的参数
-    //   data: {
-    //     name: 'hjaha',
-    //     phone: '12345678901',
-    //   },
-    //   // 成功回调
-    //   complete: () => {
-
-    //   }
-    // })
+    const { name, regionValue, address, phone, startTime, endTime  } = this.state
+    const data = {
+      name,
+      phone,
+      regions: regionValue,
+      address,
+      openingTime: startTime,
+      closingTime: endTime
+    }
+    validate.methods['vEndTime'] = (v) => {
+      const endIndex = this.state.rangeTime.indexOf(v)
+      const startIndex = this.state.rangeTime.indexOf(this.state.startTime)
+      return endIndex > startIndex
+    }
+    const vRes = validate([
+      { type: 'vEmpty', value: name, msg: '请输入商家名称' },
+      { type: 'vArrEmpty', value: regionValue, msg: '请选择省市区' },
+      { type: 'vEmpty', value: address, msg: '请输入地址' },
+      { type: 'vEmpty', value: phone, msg: '请输入联系方式' },
+      { type: 'vTel', value: phone, msg: '手机号码格式有误' },
+      { type: 'vEmpty', value: startTime, msg: '请选择营业起始时间' },
+      { type: 'vEmpty', value: endTime, msg: '请选择营业截止时间' },
+      { type: 'vEndTime', value: endTime, msg: '营业截止时间不能早于起始时间' },
+    ])
+    if (vRes !== true) {
+      Taro.atMessage({ 'message': vRes, 'type': 'error', })
+      return
+    }
+    
+    const res = await cloudRequest({ name: 'businessRegiste', data })
+    if (res.code !== 'success') return
 
     if(await showModal({
       title: '创建完成',
@@ -66,9 +88,10 @@ export default class Login extends Component {
   }
 
   render () {
-    const { regionValue, startTime, rangeStartTime, endTime, rangeEndTime } = this.state
+    const { regionValue, startTime, rangeTime, endTime } = this.state
     return (
       <View className='p-page'>
+        <AtMessage />
         <View className='p-contain'>
           <View className='p-form'>
             <View className='u-item'>
@@ -81,19 +104,19 @@ export default class Login extends Component {
             </View>
             <View className='u-item'>
               <View className='u-name'>地址</View>
-              <Input className='u-input' placeholder='请输入详细地址' placeholderClass='color-888' maxLength='30' onBlur={this.onChangeInput.bind(this, 'name')} />
+              <Input className='u-input' placeholder='请输入详细地址' placeholderClass='color-888' maxLength='30' onBlur={this.onChangeInput.bind(this, 'address')} />
             </View>
             <View className='u-item'>
               <View className='u-name'>联系方式</View>
-              <Input className='u-input' placeholder='请输入电话' type='number' placeholderClass='color-888' maxLength='11' onBlur={this.onChangeInput.bind(this, 'name')} />
+              <Input className='u-input' placeholder='请输入电话' type='number' placeholderClass='color-888' maxLength='11' onBlur={this.onChangeInput.bind(this, 'phone')} />
             </View>
             <View className='u-item'>
               <View className='u-name'>营业起始</View>
-              <Picker className={`u-input ${!startTime && 'color-888'}`} mode='selector' range={rangeStartTime} onChange={this.onChangeStartTime.bind(this)}>{startTime || '请选择营业起始时间'}</Picker>
+              <Picker className={`u-input ${!startTime && 'color-888'}`} mode='selector' range={rangeTime} onChange={this.onChangeStartTime.bind(this)}>{startTime || '请选择营业起始时间'}</Picker>
             </View>
             <View className='u-item'>
               <View className='u-name'>营业截止</View>
-              <Picker className={`u-input ${!endTime && 'color-888'}`} mode='selector' range={rangeEndTime} onChange={this.onChangeEndTime.bind(this)}>{endTime || '请选择营业截止时间'}</Picker>
+              <Picker className={`u-input ${!endTime && 'color-888'}`} mode='selector' range={rangeTime} onChange={this.onChangeEndTime.bind(this)}>{endTime || '请选择营业截止时间'}</Picker>
             </View>
           </View>
           <View className='u-foot'>
