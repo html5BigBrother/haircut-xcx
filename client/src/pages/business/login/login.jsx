@@ -62,7 +62,7 @@ export default class Login extends Component {
       showCancel: false,
       confirmText: '前往',
       confirmColor: '#7B8FFF'
-    })) redirectTo('/pages/business/staff_add/staff_add')
+    })) redirectTo('/pages/business/index/index', { current: 1 })
   }
 
   render () {

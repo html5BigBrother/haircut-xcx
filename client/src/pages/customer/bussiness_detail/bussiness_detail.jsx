@@ -76,29 +76,47 @@ export default class BussinessDetail extends Component {
         borderColor: '#BFBFBF',
         containLabel: true
       },
+      color: '#30CB9B',
+      textStyle: {
+        color: '#222'
+      },
       xAxis: [
         {
           type: 'category',
           boundaryGap: false,
+          axisLine: {
+            lineStyle: {
+              color: '#BFBFBF'
+            }
+          },
+          axisTick: {
+            lineStyle: {
+              color: '#BFBFBF'
+            }
+          },
           data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
         }
       ],
       yAxis: [
         {
-          type: 'value'
+          type: 'value',
+          axisLine: {
+            show: false
+          },
+          axisTick: {
+            show: false
+          },
+          splitLine: {
+            lineStyle: {
+              type: 'dotted'
+            }
+          },
         }
       ],
       series: [
         {
           name: '体温折线图',
           type: 'line',
-          stack: '总量',
-          label: {
-            normal: {
-              show: true,
-              position: 'top'
-            }
-          },
           data: [820, 932, 901, 934, 1290, 1330, 1320]
         }
       ]

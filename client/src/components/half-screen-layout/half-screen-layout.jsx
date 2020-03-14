@@ -15,7 +15,7 @@ onChangeShow 改变父组件show
 
 const defaultProps = {
   show: false,
-  title: ''
+  title: '',
 }
 
 class HalfScreenLayout extends Component {
@@ -36,6 +36,7 @@ class HalfScreenLayout extends Component {
           { title && <View className='layout-container-title'>{title}</View>}
           <View className='layout-close' onClick={() => { this.props.onChangeShow(false) }}><AtIcon color='#888888' value='close-circle'></AtIcon></View>
           <View className='layout-container-body'>{this.props.children}</View>
+          <View className='layout-container-footer'>{this.props.renderFooter}</View>
         </View>
       </View>
     )

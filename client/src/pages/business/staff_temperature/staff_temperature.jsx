@@ -64,15 +64,19 @@ export default class UserEdit extends Component {
             }
           </View>
         </View>
-        <HalfScreenLayout show={layoutShow} title='添加体温' onChangeShow={this.onChangeShow.bind(this)}>
+        <HalfScreenLayout
+          show={layoutShow}
+          title='添加体温'
+          onChangeShow={this.onChangeShow.bind(this)}
+          renderFooter={
+            <Button className='btn-style btn-purple btn-large btn-circle-44' hoverClass='btn-hover' onClick={this.onChangeShow.bind(this, true)}>确认</Button>
+          }
+        >
           <View className='p-form'>
             <View className='u-item'>
               <View className='u-name'>体温</View>
               <Input className='u-input' placeholder='请输入体温' placeholderClass='color-888' maxLength='20' onBlur={this.onChangeInput.bind(this, 'name')} />
             </View>
-          </View>
-          <View className='p-bottom-btn'>
-            <Button className='btn-style btn-purple btn-large btn-circle-44' hoverClass='btn-hover' onClick={this.onChangeShow.bind(this, true)}>确认</Button>
           </View>
         </HalfScreenLayout>
       </View>

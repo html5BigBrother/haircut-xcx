@@ -17,7 +17,7 @@ class App extends Component {
       Taro.cloud.init()
     }
     Taro.cloud.init({
-      env: 'demo-q37go',
+      env: 'dev-6w2bf',
       traceUser: true    
     })
   }
@@ -50,7 +50,7 @@ class App extends Component {
           'user_edit/user_edit',
           'staff_add/staff_add',
           'staff_temperature/staff_temperature',
-          'staff_temperature_history/staff_temperature_history'
+          'staff_temperature_history/staff_temperature_history',
         ]
       },
     ],

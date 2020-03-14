@@ -43,3 +43,14 @@ export function showModal({ title, content, showCancel, confirmText, cancelText,
     })
   })
 }
+export function showModalError({ title, content, confirmText, confirmColor, cancelColor }) {
+  return new Promise(function (resolve) {
+    Taro.showModal({
+      title: title || '错误',
+      content: content || '系统繁忙',
+      showCancel: false,
+      confirmText: confirmText || '确定',
+      confirmColor: confirmColor || '#3CC51F',
+    })
+  })
+}

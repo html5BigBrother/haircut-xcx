@@ -71,15 +71,17 @@ export default class UserEdit extends Component {
             </View>
             {
               dateList.map((item, index) =>
-                <View key={item.date}>
-                  <View className='u-item-date' hoverClass='view-hover'  onClick={this.onChangeActive.bind(this, index)}>
-                    <View className='flex-1 u-title'>{item.date}</View>
-                    <AtIcon className={`u-chevron ${item.active && 'active'}`} value='chevron-right' size='14' color='#888'></AtIcon>
+                <View className='accordion-wrap' key={item.date}>
+                  <View className='accordion-head' hoverClass='view-hover'  onClick={this.onChangeActive.bind(this, index)}>
+                    <View className='accordion-content'>
+                      <View className='flex-1 u-title'>{item.date}</View>
+                    </View>
+                    <AtIcon className={`accordion-chevron ${item.active && 'active'}`} value='chevron-down' size='14' color='#888'></AtIcon>
                   </View>
-                  <View className={`u-temperature-list ${item.active && 'active'}`}>
+                  <View className={`accordion-list ${item.active && 'active'}`}>
                     {
                       item.itemList.map((item2) =>
-                        <View className='u-item-temperature' key={item2.name}>
+                        <View className='accordion-item' key={item2.name}>
                           <View className='flex-1'>{item2.name}</View>
                           <View className={`color-g ${item2.price > 38 && 'color-r'}`}>{item2.price}</View>
                         </View>

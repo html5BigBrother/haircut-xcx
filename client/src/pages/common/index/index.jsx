@@ -3,9 +3,11 @@ import { View, Text, Image, Button } from '@tarojs/components'
 import './index.styl'
 
 import { navigateTo } from '../../../utils/util'
+import cloudRequest from '../../../utils/request_cloud'
 
 // import { set as setGlobalData, get as getGlobalData } from '../../../utils/global_data'
-import icon_logo from '../../../static/imgs/icon.jpg'
+import icon_logo from '../../../static/imgs/icon_logo.svg'
+import index_bg from '../../../static/imgs/index_bg.png'
 
 export default class Index extends Component {
 
@@ -28,7 +30,8 @@ export default class Index extends Component {
     navigationBarTitleText: '首页'
   }
 
-  onClickBusiness() {
+  async onClickBusiness() {
+    const res = await cloudRequest({ name: 'autoLogin', data: { type: 'business' } })
     navigateTo('/pages/business/login/login')
   }
 
@@ -41,7 +44,7 @@ export default class Index extends Component {
     return (
       <View className='p-page'>
         <View className='p-contain'>
-          <Image className='u-bg-logo' src={icon_logo} />
+          <Image className='u-bg-logo' src={index_bg} />
           <View className='u-brand-name'>快预约</View>
           <View className='u-brand-slogan'>这是一句宣传语</View>
           <View className='u-enter-wrap'>

@@ -8,6 +8,7 @@ import './check-list.styl'
 
 show 控制显示隐藏
 onChangeShow 改变父组件show
+checkedBgColor 选中背景色
 
 */
 
@@ -37,13 +38,13 @@ class CheckList extends Component {
   }
 
   render () {
-    const { checkList } = this.props
+    const { checkList, checkedBgColor } = this.props
     return (
-      <View className='check-list-style'>
+      <View className='check-list-style check-list-class'>
         <CheckboxGroup onChange={this.onChangeCheckedList.bind(this)}>
           {
             checkList.map((item, index) => 
-              <Label className={`u-label ${item.disabled && 'disabled'} ${item.checked && 'checked'}`} key={index}>
+              <Label className={`u-label ${item.disabled && 'disabled'} ${item.checked && 'checked'}`} style={item.checked ? `background-color: ${checkedBgColor};` : ''} key={item.value}>
                 <Checkbox className='u-checkbox' value={index} disabled={item.disabled} checked={item.checked}></Checkbox>
                 <Text>09:00</Text>
               </Label>

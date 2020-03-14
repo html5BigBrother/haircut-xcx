@@ -1,6 +1,7 @@
 
 .layout-warp
   position fixed
+  z-index 801
   .layout-mask
     position fixed
     top 0
@@ -12,6 +13,8 @@
     visibility hidden
     transition all 300ms ease-in
   .layout-container
+    display flex
+    flex-direction column
     position fixed
     bottom 0
     width 100%
@@ -26,6 +29,11 @@
     text-align center
     padding 40px 0
     font-weight 500
+  .layout-container-body
+    flex 1
+  .layout-container-footer
+    padding 40px
+
   .layout-close
     position absolute
     right 40px

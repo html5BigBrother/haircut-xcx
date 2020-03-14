@@ -9,6 +9,8 @@ page
 // 颜色
 .color-g
   color #30CB9B
+.color-r
+  color #EC4040
 .color-888
   color #888
 .color-222
@@ -48,6 +50,10 @@ page
 .btn-purple
   background #7B8FFF
   color #fff
+.btn-purple-o
+  color #7B8FFF
+  border 2px solid #7B8FFF
+  background #fff
 // 按钮 - 大小
 .btn-large
   width 100%
@@ -65,6 +71,7 @@ page
   border 0
 
 // 列表样式
+//用户商家列表
 .list-style-sheet1
   .sheet1-item-wrap
     padding-left 40px
@@ -92,3 +99,52 @@ page
     line-height 26px
     &+.sheet1-item-text-2
       margin-top 20px
+// 员工商家管理
+.list-style-sheet2
+  font-size 32px
+  color #222
+  .sheet2-item-wrap
+    padding-left 40px
+  .sheet2-item
+    display flex
+    align-items center
+    height 92px
+    padding-right 40px
+    border-bottom 2px solid #F2F2F2
+  .sheet2-item-name
+    flex 1
+
+// 手风琴样式
+.accordion-wrap
+  .accordion-head
+    display flex
+    align-items center
+    height 92px
+    background #F6F6F6
+    padding 0 40px
+    border-top 2px solid #F2F2F2
+    border-bottom 2px solid #F2F2F2
+  .accordion-content
+    flex 1
+    display flex
+    align-items center
+  .accordion-chevron
+    transition all 0.5s
+    transform rotateZ(0)
+    &.active
+      transform rotateZ(180deg)
+  .accordion-list
+    overflow-y auto
+    max-height 0
+    transition max-height 0.5s
+    &.active
+      max-height 470px
+  .accordion-item
+    display flex
+    align-items center
+    height 92px
+    border-bottom 2px solid #F2F2F2
+    margin-left 40px
+    padding-right 40px
+    &:last-child
+      border-bottom 0
