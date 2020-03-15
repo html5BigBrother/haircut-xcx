@@ -2,7 +2,7 @@ import Taro, { Component } from '@tarojs/taro'
 import { View, Text, Image, Button } from '@tarojs/components'
 import './index.styl'
 
-import { navigateTo } from '../../../utils/util'
+import { navigateTo, reLaunch, setUserInfo } from '../../../utils/util'
 import cloudRequest from '../../../utils/request_cloud'
 
 // import { set as setGlobalData, get as getGlobalData } from '../../../utils/global_data'
@@ -31,8 +31,15 @@ export default class Index extends Component {
   }
 
   async onClickBusiness() {
-    const res = await cloudRequest({ name: 'autoLogin', data: { type: 'business' } })
-    navigateTo('/pages/business/login/login')
+    Taro.showLoading({ title: '加载中', mask: true })
+    const res = await cloudRequest({ name: 'autoLogin', data: { type: 'business' }, errorTips: false })
+    Taro.hideLoading()
+    if (res.code === 'success') {
+      setUserInfo({ identity: 'business', data: res.data })
+      reLaunch('/pages/business/index/index')
+    } else {
+      navigateTo('/pages/business/login/login')
+    }
   }
 
   onClickCustomer() {

@@ -6,6 +6,10 @@ import './bussiness_detail.styl'
 // import { navigateTo } from '../../../utils/util'
 
 import icon_logo from '../../../static/imgs/icon.jpg'
+import icon_save from '../../../static/imgs/icon_save.svg'
+import icon_map from '../../../static/imgs/icon_map.svg'
+import icon_clock from '../../../static/imgs/icon_clock.svg'
+import icon_phone_2 from '../../../static/imgs/icon_phone_2.svg'
 
 import HalfScreenLayout from '../../../components/half-screen-layout/half-screen-layout'
 import LineCharts from '../../../components/line-charts/line-charts'
@@ -168,12 +172,12 @@ export default class BussinessDetail extends Component {
         </View>
         <View className='u-detail-list'>
           <View className='u-detail-item'>
-            <AtIcon value='map-pin' color='#888' size={16}></AtIcon>
+            <Image className='u-detail-icon-1' src={icon_map} />
             <View className='u-detail-item-value'>蜀山街道22号</View>
-            <AtIcon value='phone' color='#4BCD6F' size={24} onClick={this.onClickPhone}></AtIcon>
+            <Image className='u-detail-icon-2' src={icon_phone_2} onClick={this.onClickPhone} />
           </View>
           <View className='u-detail-item'>
-            <AtIcon value='clock' color='#888' size={16}></AtIcon>
+            <Image className='u-detail-icon-1' src={icon_clock} />
             <View className='u-detail-item-value'>营业时间 09:00-21:00</View>
           </View>
         </View>
@@ -195,7 +199,7 @@ export default class BussinessDetail extends Component {
                   <View className='sheet1-item-content'>
                     <View className='sheet1-item-text-1'>
                       <Text style={`margin-right: ${Taro.pxTransform(12)};`}>Tony</Text>
-                      <AtIcon value='check-circle' color='#30CB9B' size={14}></AtIcon>
+                      <Image className='icon_save' src={icon_save} />
                     </View>
                     <View className='sheet1-item-text-2'><Text decode>发型总监&emsp;洗剪吹￥100起</Text></View>
                     <View className='sheet1-item-text-2'>今日体温：<Text className='color-g'>36.5℃</Text></View>
@@ -219,7 +223,9 @@ export default class BussinessDetail extends Component {
         <View className='u-order-head'>
           <View className='u-head-title'>
             <View className='text-style-1'>Tony</View>
-            <View className='u-title-icon'><AtIcon value='check-circle' color='#30CB9B' size={14}></AtIcon></View>
+            <View className='u-title-icon'>
+              <Image className='icon_save' src={icon_save} />
+            </View>
             <View className='text-style-2'>近7日体温</View>
           </View>
           <View className='u-temperature-chart'>

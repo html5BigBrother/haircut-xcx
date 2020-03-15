@@ -51,6 +51,8 @@ class App extends Component {
           'staff_add/staff_add',
           'staff_temperature/staff_temperature',
           'staff_temperature_history/staff_temperature_history',
+          'user_edit_time/user_edit_time',
+          'user_edit_address/user_edit_address'
         ]
       },
     ],

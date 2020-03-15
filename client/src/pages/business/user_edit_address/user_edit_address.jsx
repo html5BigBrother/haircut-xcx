@@ -1,10 +1,10 @@
 import Taro, { Component } from '@tarojs/taro'
-import { View, Button, Input } from '@tarojs/components'
+import { View, Button, Input, Picker } from '@tarojs/components'
 import { AtMessage } from 'taro-ui'
-import './user_edit.styl'
+import './user_edit_address.styl'
 
 import validate from '../../../utils/validate'
-import { showModal, reLaunch, setUserInfo } from '../../../utils/util'
+import { reLaunch } from '../../../utils/util'
 import cloudRequest from '../../../utils/request_cloud'
 
 export default class UserEdit extends Component {
@@ -12,15 +12,17 @@ export default class UserEdit extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      name: '',
-      type: ''
+      regions: [],
+      address: ''
     }
   }
 
   componentDidMount () {
+    const regions = JSON.parse(this.$router.params.regions)
+    const address = this.$router.params.address
     this.setState({
-      name: this.$router.params.name,
-      type: this.$router.params.type
+      regions,
+      address
     })
   }
 
@@ -28,17 +30,28 @@ export default class UserEdit extends Component {
     navigationBarTitleText: '我的',
   }
 
-  onChangeInput(e) {
-    this.setState({ name: e.detail.value })
+  onChangeInput(valueName, e) {
+    this.setState({ [valueName]: e.detail.value })
+  }
+
+  onChangeRegion(e) {
+    const regions = e.detail.value
+    this.setState({ regions })
   }
 
   // 确认修改
   async onClickSure() {
-    const { name, type } = this.state
-    const data = { [type]: name }
+    const { regions, address } = this.state
+    const data = { regions, address }
 
+    validate.methods['vEndTime'] = (v) => {
+      const endIndex = this.state.rangeTime.indexOf(v)
+      const startIndex = this.state.rangeTime.indexOf(this.state.openingTime)
+      return endIndex > startIndex
+    }
     const vRes = validate([
-      { type: 'vEmpty', value: name, msg: '内容不能为空' },
+      { type: 'vArrEmpty', value: regions, msg: '请选择省市区' },
+      { type: 'vEmpty', value: address, msg: '请输入地址' },
     ])
     if (vRes !== true) {
       Taro.atMessage({ 'message': vRes, 'type': 'error', })
@@ -56,14 +69,17 @@ export default class UserEdit extends Component {
   }
 
   render () {
-    const { name } = this.state
+    const { regions, address } = this.state
     return (
       <View className='p-page'>
         <AtMessage />
         <View className='p-contain'>
           <View className='p-operation-list'>
             <View className='u-item'>
-              <Input className='flex-1' placeholderClass='color-888' maxLength='20' value={name} placeholder='请输入内容' onBlur={this.onChangeInput.bind(this)} />
+            <Picker className={`flex-1 ${!regions[0] && 'color-888'}`} mode='region' onChange={this.onChangeRegion.bind(this)}>{regions.length > 0 ? regions.join(' ') : '请选择省市区'}</Picker>
+            </View>
+            <View className='u-item'>
+            <Input className='u-input' placeholder='请输入详细地址' placeholderClass='color-888' maxLength='30' value={address} onBlur={this.onChangeInput.bind(this, 'address')} />
             </View>
           </View>
           <View className='p-bottom-btn'>

@@ -46,7 +46,7 @@ class CheckList extends Component {
             checkList.map((item, index) => 
               <Label className={`u-label ${item.disabled && 'disabled'} ${item.checked && 'checked'}`} style={item.checked ? `background-color: ${checkedBgColor};` : ''} key={item.value}>
                 <Checkbox className='u-checkbox' value={index} disabled={item.disabled} checked={item.checked}></Checkbox>
-                <Text>09:00</Text>
+                <Text>{item.value}</Text>
               </Label>
             )
           }

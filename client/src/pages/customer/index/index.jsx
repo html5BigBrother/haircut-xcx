@@ -6,7 +6,14 @@ import './index.styl'
 import { navigateTo } from '../../../utils/util'
 
 import icon_logo from '../../../static/imgs/icon.jpg'
+import icon_save from '../../../static/imgs/icon_save.svg'
 import icon_nouser from '../../../static/imgs/icon_nouser.svg'
+import tabbar_index_customer from '../../../static/imgs/tabbar_index_customer.svg'
+import tabbar_index_customer_on from '../../../static/imgs/tabbar_index_customer_on.svg'
+import tabbar_order_customer from '../../../static/imgs/tabbar_order_customer.svg'
+import tabbar_order_customer_on from '../../../static/imgs/tabbar_order_customer_on.svg'
+import tabbar_user_customer from '../../../static/imgs/tabbar_user_customer.svg'
+import tabbar_user_customer_on from '../../../static/imgs/tabbar_user_customer_on.svg'
 
 export default class Index extends Component {
 
@@ -82,7 +89,7 @@ export default class Index extends Component {
                   <View className='sheet1-item-content'>
                     <View className='sheet1-item-text-1'>
                       <Text style={`margin-right: ${Taro.pxTransform(12)};`}>item.name</Text>
-                      <AtIcon value='check-circle' color='#30CB9B' size={14}></AtIcon>
+                      <Image className='icon_save' src={icon_save} />
                     </View>
                     <View className='sheet1-item-text-2'>滨江区星光大道B座2楼</View>
                     <View className='sheet1-item-text-2'>营业时间 09:00-21:00</View>
@@ -187,9 +194,9 @@ export default class Index extends Component {
           selectedColor='#EC8140'
           backgroundColor='#FAFAFA'
           tabList={[
-            { title: '主页', iconType: 'home', },
-            { title: '预约', iconType: 'clock' },
-            { title: '我的', iconType: 'user' }
+            { title: '主页', image: tabbar_index_customer, selectedImage: tabbar_index_customer_on },
+            { title: '预约', image: tabbar_order_customer, selectedImage: tabbar_order_customer_on },
+            { title: '我的', image: tabbar_user_customer, selectedImage: tabbar_user_customer_on }
           ]}
           onClick={this.onClickTabBar.bind(this)}
           current={this.state.current}

@@ -1,11 +1,25 @@
 import Taro, { Component } from '@tarojs/taro'
 import { View, Text, Image, Button, Input } from '@tarojs/components'
-import { AtTabBar, AtIcon, AtFloatLayout, AtCalendar } from 'taro-ui'
+import { AtTabBar, AtIcon, AtFloatLayout, AtCalendar, AtAvatar, AtMessage } from 'taro-ui'
 import './index.styl'
 
-import { navigateTo } from '../../../utils/util'
+import validate from '../../../utils/validate'
+import { navigateTo, reLaunch, getUserInfo, clearUserInfo, showModal } from '../../../utils/util'
+import { businessHours, businessProjects } from '../../../utils/enums'
+import cloudRequest from '../../../utils/request_cloud'
 
-import icon_logo from '../../../static/imgs/icon.jpg'
+import icon_map from '../../../static/imgs/icon_map.svg'
+import icon_clock from '../../../static/imgs/icon_clock.svg'
+import icon_phone_1 from '../../../static/imgs/icon_phone_1.svg'
+import icon_nouser from '../../../static/imgs/icon_nouser.svg'
+import tabbar_index_business from '../../../static/imgs/tabbar_index_business.svg'
+import tabbar_index_business_on from '../../../static/imgs/tabbar_index_business_on.svg'
+import tabbar_manager_business from '../../../static/imgs/tabbar_manager_business.svg'
+import tabbar_manager_business_on from '../../../static/imgs/tabbar_manager_business_on.svg'
+import tabbar_order_business from '../../../static/imgs/tabbar_order_business.svg'
+import tabbar_order_business_on from '../../../static/imgs/tabbar_order_business_on.svg'
+import tabbar_user_business from '../../../static/imgs/tabbar_user_business.svg'
+import tabbar_user_business_on from '../../../static/imgs/tabbar_user_business_on.svg'
 
 import HalfScreenLayout from '../../../components/half-screen-layout/half-screen-layout'
 import CheckList from '../../../components/check-list/check-list'
@@ -15,53 +29,32 @@ export default class Index extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      businessId: '',
       current: 0,
-      orderList: [
-        { name: '1' },
-        { name: '1' },
-        { name: '1' },
-        { name: '1' },
-      ],
       indexInfo: {
         layoutShow: false,
         isOpenedDate: false,
         isOpenedTime: false,
         currentDate: '',
         currentTime: '',
-        checkList: [
-          { value: '9:00', disabled: false, checked: false },
-          { value: '9:00', disabled: false, checked: false },
-          { value: '9:00', disabled: false, checked: false },
-          { value: '9:00', disabled: false, checked: false },
-          { value: '9:00', disabled: false, checked: false },
-        ],
-        checkList2: [
-          { value: '9:00', disabled: false, checked: false },
-          { value: '9:00', disabled: false, checked: false },
-          { value: '9:00', disabled: false, checked: false },
-          { value: '9:00', disabled: false, checked: false },
-          { value: '9:00', disabled: false, checked: false },
-        ],
-        staffOrderList: [
-          {
-            date: '2020-03-21',
-            active: true,
-            itemList: [
-              { name: 'Json', price: '36.5' },
-              { name: 'Tony', price: '36.5' },
-              { name: 'Jck', price: '36.5' }
-            ]
-          },
-          {
-            date: '2020-03-21',
-            active: false,
-            itemList: [
-              { name: 'Json', price: '36.5' },
-              { name: 'Tony', price: '36.5' },
-              { name: 'Jck', price: '36.5' }
-            ]
-          },
-        ]
+        currentName: '',
+        currentCustomerId: '',
+        currentBarberId: '',
+
+        checkList: [],
+        checkList2: [],
+        staffOrderList: [],
+      },
+      staffInfo: {
+        hasLoad: false,
+        staffList: []
+      },
+      orderInfo: {
+        hasLoad: false,
+        orderList: []
+      },
+      userInfo: {
+        hasLoad: false,
       }
     }
   }
@@ -69,10 +62,13 @@ export default class Index extends Component {
   componentWillMount () { }
 
   componentDidMount () {
+    const businessId = getUserInfo().id
     let current = this.$router.params.current ? Number(this.$router.params.current) : 0
     this.setState({
+      businessId,
       current
     })
+    this.switchInfo(current)
   }
 
   componentWillUnmount () { }
@@ -85,10 +81,140 @@ export default class Index extends Component {
     navigationBarTitleText: '快预约',
   }
 
+  switchInfo(current) {
+    switch (current) {
+      case 0:
+        this.getIndexInfo()
+        break
+      case 1:
+        this.getStaffInfo()
+        break
+      case 2:
+        this.getOrderInfo()
+        break
+      case 3:
+        this.getUserInfo()
+        break
+    }
+  }
+
+  hasLoad(current) {
+    const { indexInfo, staffInfo, orderInfo, userInfo } = this.state
+    switch (current) {
+      case 0:
+        return indexInfo.hasLoad
+      case 1:
+        return staffInfo.hasLoad
+      case 2:
+        return orderInfo.hasLoad
+      case 3:
+        return userInfo.hasLoad
+    }
+  }
+
+  async getIndexInfo() {
+    const { indexInfo, staffInfo, orderInfo, userInfo } = this.state
+
+    if (!staffInfo.hasLoad) await this.getStaffInfo()
+
+    if (!orderInfo.hasLoad) await this.getOrderInfo()
+
+    // 根据营业时间筛选可选时间
+    const userInfoNewest = userInfo.hasLoad ? userInfo : await this.getUserInfo()
+    const businessHoursFilter = businessHours.slice(businessHours.indexOf(userInfoNewest.openingTime), businessHours.indexOf(userInfoNewest.closingTime) + 1)
+
+    indexInfo.checkList = businessHoursFilter.map(item => {
+      return {
+        value: item,
+        disabled: false,
+        checked: false
+      }
+    })
+    indexInfo.checkList2 = businessProjects.map(item => {
+      return {
+        value: item,
+        disabled: false,
+        checked: false
+      }
+    })
+
+    this.setState({ indexInfo })
+
+  }
+
+  async getStaffInfo() {
+    const { businessId, staffInfo } = this.state
+    Taro.showLoading({ title: '加载中', mask: true })
+    const res = await cloudRequest({ name: 'getBarbers', data: { businessId: businessId || getUserInfo().id } })
+    Taro.hideLoading()
+    if (!res || res.code !== 'success') return
+
+    staffInfo.staffList = res.data || []
+    this.setState({ staffInfo })
+  }
+
+  async getOrderInfo(cb) {
+    const { businessId, orderInfo } = this.state
+    Taro.showLoading({ title: '加载中', mask: true })
+    const res = await cloudRequest({ name: 'getSubscribes', data: { businessId: businessId || getUserInfo().id } })
+    Taro.hideLoading()
+    if (!res || res.code !== 'success') return
+
+    orderInfo.orderList = res.data || []
+    if (cb) cb(orderInfo)
+    else this.setState({ orderInfo })
+  }
+
+  async getUserInfo() {
+    Taro.showLoading({ title: '加载中', mask: true })
+    const res = await cloudRequest({ name: 'getBusinessDetail', data: { businessId: this.state.businessId || getUserInfo().id } })
+    Taro.hideLoading()
+    if (!res || res.code !== 'success') return
+
+    const { name, openingTime, closingTime, phone, regions, address } = res.data
+    const regionsFilter = regions[0] === regions[1] ? regions.splice(1) : regions
+    const userInfo = {
+      name,
+      openingTime,
+      closingTime,
+      phone,
+      regions,
+      address,
+      businessTime: `${openingTime}-${closingTime}`,
+      fullAddress: regionsFilter.join('') + address
+    }
+    this.setState({ userInfo })
+    return userInfo
+  }
+
+  // 重组主页显示数据
+  reformStaffOrderList(options) {
+    const indexInfo = options.indexInfo || this.state.indexInfo
+    const staffInfo = options.staffInfo || this.state.staffInfo
+    const orderInfo = options.orderInfo || this.state.orderInfo
+
+    // 筛选显示数据
+    const currentDate = indexInfo.currentDate
+    const currentTime = indexInfo.currentDate
+    const orderListFilter = orderInfo.orderList.filter(item => item.subscribeDate === currentDate && item.subscribeTime === currentTime)
+    indexInfo.staffOrderList = staffInfo.staffList.map(item => {
+      const orderList = orderListFilter.filter(item2 => item2.barberId = item._id)
+      return {
+        active: true,
+        name: item.name,
+        barberId: item._id,
+        canSubscribe: item.canSubscribe,
+        orderList
+      }
+    })
+    this.setState({ indexInfo })
+  }
+
   onClickTabBar(value) {
     this.setState({
       current: value
     })
+    if (!this.hasLoad(value)) this.switchInfo(value)
   }
 
   //添加员工
@@ -102,18 +228,89 @@ export default class Index extends Component {
   }
 
   // 修改姓名
-  onClickToUserEdit() {
-    navigateTo('/pages/business/user_edit/user_edit', { name: 'hahah', type: '1' })
+  onClickToUserEdit(type) {
+    const { userInfo } = this.state
+    if (type === 'businessTime') navigateTo('/pages/business/user_edit_time/user_edit_time', { openingTime: userInfo.openingTime, closingTime: userInfo.closingTime })
+    else if (type === 'fullAddress') navigateTo('/pages/business/user_edit_address/user_edit_address', { regions: JSON.stringify(userInfo.regions), address: userInfo.address })
+    else navigateTo('/pages/business/user_edit/user_edit', { name: this.state.userInfo[type], type: type })
   }
 
   // 主页预约
   onClickAppoint(item, e) {
     e.stopPropagation()
+    const { indexInfo } = this.state
+
+    indexInfo.checkList2.forEach(item2 => { item2.checked = false })
+    indexInfo.currentName = item.name
+    indexInfo.currentBarberId = item.barberId
+    this.setState({ indexInfo })
+
     this.onChangeShow(true)
   }
 
+  // 确认预约
+  async onClickAppointSure() {
+    const { businessId, indexInfo } = this.state
+    const projects = indexInfo.checkList2.filter(item => item.checked).map(item => item.value)
+    const data = {
+      customerId: indexInfo.currentCustomerId,
+      businessId,
+      barberId: indexInfo.currentBarberId,
+      subscribeDate: indexInfo.currentDate,
+      subscribeTime: indexInfo.currentTime,
+      projects,
+      type: 'agent'
+    }
+
+    const vRes = validate([
+      { type: 'vEmpty', value: indexInfo.currentCustomerId, msg: '请输入手机号码' },
+      { type: 'vTel', value: indexInfo.currentCustomerId, msg: '手机号码格式有误' },
+    ])
+
+    if (vRes !== true) {
+      Taro.atMessage({ 'message': vRes, 'type': 'error', })
+      return
+    }
+
+    Taro.showLoading({ title: '加载中', mask: true })
+    const res = await cloudRequest({ name: 'subscribe', data })
+    Taro.hideLoading()
+    if (!res || res.code !== 'success') return
+
+    Taro.atMessage({ 'message': '登记成功', 'type': 'success', })
+    this.onChangeShow(false)
+    this.getOrderInfo((orderInfo) => {
+      this.reformStaffOrderList({ orderInfo })
+    })
+  }
+
+  // 删除预约
+  async onClickDelOrder(item) {
+    const data = {
+      subscribeId: item._id,
+      cancelerType: 'business'
+    }
+    if (!(await Taro.showModal({ content: '确认删除吗？' }))) return
+
+    Taro.showLoading({ title: '正在删除', mask: true })
+    const res = await cloudRequest({ name: 'cancelSubscribe', data })
+    Taro.hideLoading()
+    if (!res || res.code !== 'success') return
+
+    Taro.atMessage({ 'message': '已删除预约', 'type': 'success', })
+
+    this.getOrderInfo((orderInfo) => {
+      this.reformStaffOrderList({ orderInfo })
+    })
+  }
+
   // 退出
-  onClickQuit() {}
+  async onClickQuit() {
+    if (await showModal({ content: '确定退出吗？' })) {
+      clearUserInfo()
+      reLaunch('/pages/common/index/index')
+    }
+  }
 
   onChangeShow(layoutShow) {
     const { indexInfo } = this.state
@@ -143,9 +340,11 @@ export default class Index extends Component {
   onChangeCheckList(option) {
     const { indexInfo } = this.state
     indexInfo.checkList = option.checkList
-    indexInfo.currentTime = option.checkList.filter(item => item.checked)[0] || ''
+    indexInfo.currentTime = option.checkList.filter(item => item.checked)[0].value || ''
     indexInfo.isOpenedTime = false
-    this.setState({ indexInfo })
+
+    if (indexInfo.currentDate && indexInfo.currentTime) this.reformStaffOrderList({ indexInfo })
+    else this.setState({ indexInfo })
   }
   onChangeCheckList2(option) {
     const { indexInfo } = this.state
@@ -153,11 +352,19 @@ export default class Index extends Component {
     this.setState({ indexInfo })
   }
 
+  onChangeInput(valueName, e) {
+    const { indexInfo } = this.state
+    indexInfo[valueName] = e.detail.value
+    this.setState({ indexInfo })
+  }
+
   onSelectDate(e) {
     let { indexInfo } = this.state
     indexInfo.currentDate = e.value.start
     indexInfo.isOpenedDate = false
-    this.setState({ indexInfo })
+
+    if (indexInfo.currentDate && indexInfo.currentTime) this.reformStaffOrderList({ indexInfo })
+    else this.setState({ indexInfo })
   }
 
   // 主页
@@ -174,7 +381,7 @@ export default class Index extends Component {
               <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
             </View>
           </View>
-          <View className='sheet2-item-wrap' hoverClass='view-hover' onClick={this.onChangeIsOpenedTime.bind(this, true)}>
+          <View className='sheet2-item-wrap' style='border-bottom: 1px solid f2f2f2;' hoverClass='view-hover' onClick={this.onChangeIsOpenedTime.bind(this, true)}>
             <View className='sheet2-item' style='border-bottom: 0;'>
               <View className='sheet2-item-name'>选择时间</View>
                 <View className='p-margin-r-20'>{indexInfo.currentTime}</View>
@@ -185,29 +392,29 @@ export default class Index extends Component {
         <View className='p-staff-order-list'>
           {
             indexInfo.staffOrderList.map((item, index) =>
-              <View className='accordion-wrap' key={item.id}>
+              <View className='accordion-wrap' key={item.barberId}>
                 <View className='accordion-head' hoverClass='view-hover' onClick={this.onChangeActive.bind(this, index)}>
                   <View className='accordion-content'>
-                    <View className='u-text-1'>{item.date}</View>
+                    <View className='u-text-1'>{item.name}</View>
                     <View className='u-point-purple'></View>
-                    <View className='u-text-2'>已约3</View>
+                    <View className='u-text-2'>已约{item.orderList.length || 0}</View>
                     <View className='u-point-green'></View>
-                    <View className='u-text-2'>剩余2</View>
-                    <Button className='btn-style btn-purple-o u-btn' hoverClass='btn-hover' onClick={this.onClickAppoint.bind(this, item)}>预约</Button>
+                    <View className='u-text-2'>剩余{5 - item.orderList.length > 0 ? 5 - item.orderList.length : 0}</View>
+                    { (item.canSubscribe || item.orderList.length <= 5) && <Button className='btn-style btn-purple-o u-btn' hoverClass='btn-hover' onClick={this.onClickAppoint.bind(this, item)}>预约</Button>}
                   </View>
                   <AtIcon className={`accordion-chevron ${item.active && 'active'}`} value='chevron-down' size='14' color='#888'></AtIcon>
                 </View>
                 <View className={`accordion-list ${item.active && 'active'}`}>
                   {
-                    item.itemList.map((item2) =>
-                      <View className='accordion-item' key={item2.id}>
+                    item.orderList.map((item2, index2) =>
+                      <View className='accordion-item' key={item2._id}>
                         <View className='accordion-content'>
-                          <View className='u-item-text u-width-20'>1</View>
-                          <View className='u-item-text u-width-112'>范德萨范德萨范德萨</View>
-                          <View className='u-item-text u-width-186'>15757179448</View>
-                          <View className='u-item-text flex-1'>洗剪吹</View>
+                          <View className='u-item-text u-width-20'>{index2 + 1}</View>
+                          <View className='u-item-text u-width-112'>{item2.customerName}</View>
+                          <View className='u-item-text u-width-186'>{item2.customerPhone}</View>
+                          <View className='u-item-text flex-1'>{item2.projects.join('、')}</View>
                         </View>
-                        <View className='color-r'>删除</View>
+                        <View className='color-r' onClick={this.onClickDelOrder.bind(this, item2)}>删除</View>
                       </View>
                     )
                   }
@@ -228,25 +435,29 @@ export default class Index extends Component {
           title='预约'
           onChangeShow={this.onChangeShow.bind(this)}
           renderFooter={
-            <Button className='btn-style btn-purple btn-large btn-circle-44' hoverClass='btn-hover' onClick={this.onChangeShow.bind(this, false)}>立即预约</Button>
+            <Button className='btn-style btn-purple btn-large btn-circle-44' hoverClass='btn-hover' onClick={this.onClickAppointSure.bind(this)}>立即预约</Button>
           }
         >
           <View className='p-form'>
             <View className='u-item'>
               <View className='u-name'>老师</View>
-              <Text className='u-input'>Tony</Text>
+              <Text className='u-input'>{indexInfo.currentName}</Text>
             </View>
             <View className='u-item'>
               <View className='u-name'>日期</View>
-              <Text className='u-input'>Tony</Text>
+              <Text className='u-input'>{indexInfo.currentDate}</Text>
             </View>
             <View className='u-item'>
               <View className='u-name'>时间</View>
-              <Text className='u-input'>Tony</Text>
+              <Text className='u-input'>{indexInfo.currentTime}</Text>
+            </View>
+            <View className='u-item'>
+              <View className='u-name'>用户手机</View>
+              <Input type='number' className='u-input' placeholder='请输入手机号码' placeholderClass='color-888' maxLength='11' onBlur={this.onChangeInput.bind(this, 'currentCustomerId')} />
             </View>
             <View className='u-project'>
               <View className='u-project-name'>项目</View>
-              <CheckList checkedBgColor='#7B8FFF' checkList={indexInfo.checkList} onSelectedCheck={this.onChangeCheckList2.bind(this)} />
+              <CheckList checkedBgColor='#7B8FFF' checkList={indexInfo.checkList2} onSelectedCheck={this.onChangeCheckList2.bind(this)} />
             </View>
           </View>
         </HalfScreenLayout>
@@ -279,32 +490,32 @@ export default class Index extends Component {
 
   // 预约记录dom
   renderOrderList() {
-    const { orderList } = this.state
+    const { orderInfo } = this.state
     return (
       <View className='p-section-order'>
         {
-          orderList.map((item) =>
+          orderInfo.orderList.map((item) =>
             <View className='p-item-card' key={item.id}>
               <View className='u-item-form'>
                 <View className='u-item-form-name'>流水号：</View>
-                <View className='u-item-form-val flex-1'>20200000001</View>
-                <View style='color: #2A9FFF;'>已预约</View>
+                <View className='u-item-form-val flex-1'>{item.serialNumber}</View>
+                <View style='color: #2A9FFF;'>{item.status === 'success' ? '已预约': '已取消'}</View>
               </View>
               <View className='u-item-form'>
                 <View className='u-item-form-name'>客户：</View>
-                <View className='u-item-form-val flex-1'>乔治</View>
+                <View className='u-item-form-val flex-1'>{item.customerName}</View>
               </View>
               <View className='u-item-form'>
                 <View className='u-item-form-name'>发型师：</View>
-                <View className='u-item-form-val flex-1'>Tony</View>
+                <View className='u-item-form-val flex-1'>{item.barberName}</View>
               </View>
               <View className='u-item-form'>
                 <View className='u-item-form-name'>时间：</View>
-                <View className='u-item-form-val flex-1'>2020年03月03日 10:00</View>
+                <View className='u-item-form-val flex-1'>{`${item.subscribeDate} ${item.subscribeTime}`}</View>
               </View>
               <View className='u-item-form'>
                 <View className='u-item-form-name'>项目：</View>
-                <View className='u-item-form-val flex-1'>洗剪吹</View>
+                <View className='u-item-form-val flex-1'>{item.projects.join('、')}</View>
               </View>
             </View>
           )
@@ -315,38 +526,48 @@ export default class Index extends Component {
 
   // 我的dom
   renderUser() {
+    const { userInfo } = this.state
     return (
       <View className='p-section-user'>
         <View className='p-user-detail'>
-          <Image className='u-image-business' src={icon_logo} />
+          <AtAvatar
+            className='u-image-business'
+            size='large'
+            openData={
+              {
+                type: 'userAvatarUrl',
+                'default-avatar': icon_nouser
+              }
+            }
+          ></AtAvatar>
           <View className='u-detail-info'>
-            <View className='u-detail-name'>严天宇</View>
+            <View className='u-detail-name'>{userInfo.name}</View>
             <View className='u-detail-phone'>
-              <Image className='u-icon-1' src={icon_logo} />
-              <Text className='u-text-over'>浙江省杭州市滨江区江南大道…</Text>
+              <Image className='u-icon-1' src={icon_map} />
+              <Text className='u-text-over'>{userInfo.fullAddress}</Text>
             </View>
             <View className='u-detail-phone'>
-              <Image className='u-icon-2' src={icon_logo} />
-              <Text decode>09:00-21:00&emsp;</Text>
-              <Image className='u-icon-3' src={icon_logo} />
-              <Text>15000000000</Text>
+              <Image className='u-icon-2' src={icon_clock} />
+              <Text decode>{userInfo.businessTime}&emsp;</Text>
+              <Image className='u-icon-3' src={icon_phone_1} />
+              <Text>{userInfo.phone}</Text>
             </View>
           </View>
         </View>
         <View className='p-operation-list'>
-          <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit}>
+          <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit.bind(this, 'name')}>
             <View className='u-item-name'>商户名称</View>
-            <View className='u-item-value'>乔治</View>
+            <View className='u-item-value'>{userInfo.name}</View>
             <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
           </View>
-          <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit}>
+          <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit.bind(this, 'fullAddress')}>
             <View className='u-item-name'>地址</View>
-            <View className='u-item-value'>浙江省杭州市滨江区江南大范德萨范德萨放大</View>
+            <View className='u-item-value'>{userInfo.fullAddress}</View>
             <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
           </View>
-          <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit}>
+          <View className='u-item' hoverClass='view-hover' onClick={this.onClickToUserEdit.bind(this, 'businessTime')}>
             <View className='u-item-name'>营业时间</View>
-            <View className='u-item-value'>09:00-21:00</View>
+            <View className='u-item-value'>{userInfo.businessTime}</View>
             <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
           </View>
         </View>
@@ -370,6 +591,7 @@ export default class Index extends Component {
   render () {
     return (
       <View className='p-page'>
+        <AtMessage />
         <View className='p-contain'>
           {
             {
@@ -387,10 +609,10 @@ export default class Index extends Component {
           selectedColor='#7B8FFF'
           backgroundColor='#FAFAFA'
           tabList={[
-            { title: '主页', iconType: 'home', },
-            { title: '员工管理', iconType: 'clock' },
-            { title: '预约记录', iconType: 'clock' },
-            { title: '我的', iconType: 'user' }
+            { title: '主页', image: tabbar_index_business, selectedImage: tabbar_index_business_on },
+            { title: '员工管理', image: tabbar_manager_business, selectedImage: tabbar_manager_business_on },
+            { title: '预约记录', image: tabbar_order_business, selectedImage: tabbar_order_business_on },
+            { title: '我的', image: tabbar_user_business, selectedImage: tabbar_user_business_on }
           ]}
           onClick={this.onClickTabBar.bind(this)}
           current={this.state.current}

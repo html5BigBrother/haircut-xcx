@@ -4,16 +4,17 @@ import { AtMessage } from 'taro-ui'
 import './login.styl'
 
 import validate from '../../../utils/validate'
-import { showModal, redirectTo } from '../../../utils/util'
+import { showModal, reLaunch, setUserInfo } from '../../../utils/util'
 import cloudRequest from '../../../utils/request_cloud'
+import { businessHours } from '../../../utils/enums'
 
 export default class Login extends Component {
 
   constructor (props) {
     super(props)
     this.state = {
-      regionValue: [],
-      rangeTime: ['9:00', '10:00', '11:00'],
+      regions: [],
+      rangeTime: businessHours,
       startTime: '', // 营业开始时间
       endTime: '', // 营业截止时间
       name: '', // 商户美国昵称
@@ -27,12 +28,12 @@ export default class Login extends Component {
   }
 
   onChangeInput(valueName, e) {
-    this.setState({ [`${valueName}`]: e.detail.value })
+    this.setState({ [valueName]: e.detail.value })
   }
 
   onChangeRegion(e) {
-    const regionValue = e.detail.value
-    this.setState({ regionValue })
+    const regions = e.detail.value
+    this.setState({ regions })
   }
 
   onChangeStartTime(e) {
@@ -46,11 +47,11 @@ export default class Login extends Component {
   }
 
   async onClickCreate() {
-    const { name, regionValue, address, phone, startTime, endTime  } = this.state
+    const { name, regions, address, phone, startTime, endTime  } = this.state
     const data = {
       name,
       phone,
-      regions: regionValue,
+      regions,
       address,
       openingTime: startTime,
       closingTime: endTime
@@ -62,7 +63,7 @@ export default class Login extends Component {
     }
     const vRes = validate([
       { type: 'vEmpty', value: name, msg: '请输入商家名称' },
-      { type: 'vArrEmpty', value: regionValue, msg: '请选择省市区' },
+      { type: 'vArrEmpty', value: regions, msg: '请选择省市区' },
       { type: 'vEmpty', value: address, msg: '请输入地址' },
       { type: 'vEmpty', value: phone, msg: '请输入联系方式' },
       { type: 'vTel', value: phone, msg: '手机号码格式有误' },
@@ -74,9 +75,13 @@ export default class Login extends Component {
       Taro.atMessage({ 'message': vRes, 'type': 'error', })
       return
     }
-    
+
+    Taro.showLoading({ title: '加载中', mask: true })
     const res = await cloudRequest({ name: 'businessRegiste', data })
-    if (res.code !== 'success') return
+    Taro.hideLoading()
+    if (!res || res.code !== 'success') return
+    setUserInfo({ identity: 'business', data: res.data })
+
 
     if(await showModal({
       title: '创建完成',
@@ -84,11 +89,11 @@ export default class Login extends Component {
       showCancel: false,
       confirmText: '前往',
       confirmColor: '#7B8FFF'
-    })) redirectTo('/pages/business/index/index', { current: 1 })
+    })) reLaunch('/pages/business/index/index', { current: 1 })
   }
 
   render () {
-    const { regionValue, startTime, rangeTime, endTime } = this.state
+    const { regions, startTime, rangeTime, endTime } = this.state
     return (
       <View className='p-page'>
         <AtMessage />
@@ -100,7 +105,7 @@ export default class Login extends Component {
             </View>
             <View className='u-item'>
               <View className='u-name'>省市区</View>
-                <Picker className={`u-input ${!regionValue[0] && 'color-888'}`} mode='region' onChange={this.onChangeRegion.bind(this)}>{regionValue.length > 0 ? regionValue.join(' ') : '请选择省市区'}</Picker>
+                <Picker className={`u-input ${!regions[0] && 'color-888'}`} mode='region' onChange={this.onChangeRegion.bind(this)}>{regions.length > 0 ? regions.join(' ') : '请选择省市区'}</Picker>
             </View>
             <View className='u-item'>
               <View className='u-name'>地址</View>

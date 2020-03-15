@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.0.4, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 26 26" style="enable-background:new 0 0 26 26;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#7B8FFF;}
+	.st2{fill:#7B8FFF;}
+	.st3{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+</style>
+<title>编组 2</title>
+<desc>Created with Sketch.</desc>
+<g id="页面-1">
+	<g id="预约记录" transform="translate(-225.000000, -628.000000)">
+		<g id="编组-2" transform="translate(221.000000, 625.000000)">
+			<g id="矩形备份-5">
+				<rect x="4" y="3" class="st0" width="26" height="26"/>
+			</g>
+			<g id="编组-9备份" transform="translate(5.000000, 4.000000)">
+				<g id="矩形">
+					<rect x="4" y="3" class="st1" width="16" height="19"/>
+					<path class="st2" d="M20,22.5H4c-0.3,0-0.5-0.2-0.5-0.5V3c0-0.3,0.2-0.5,0.5-0.5h16c0.3,0,0.5,0.2,0.5,0.5v19
+						C20.5,22.3,20.3,22.5,20,22.5z M4.5,21.5h15v-18h-15V21.5z"/>
+				</g>
+				<g id="编组-6" transform="translate(3.000000, 6.000000)">
+					<g>
+						<path class="st3" d="M4.5,3h9C13.8,3,14,3.2,14,3.5l0,0C14,3.8,13.8,4,13.5,4h-9C4.2,4,4,3.8,4,3.5l0,0C4,3.2,4.2,3,4.5,3z"/>
+					</g>
+					<g id="矩形备份">
+						<path class="st3" d="M4.5,6h9C13.8,6,14,6.2,14,6.5l0,0C14,6.8,13.8,7,13.5,7h-9C4.2,7,4,6.8,4,6.5l0,0C4,6.2,4.2,6,4.5,6z"/>
+					</g>
+					<g id="矩形备份-2">
+						<path class="st3" d="M4.5,9h9C13.8,9,14,9.2,14,9.5l0,0c0,0.3-0.2,0.5-0.5,0.5h-9C4.2,10,4,9.8,4,9.5l0,0C4,9.2,4.2,9,4.5,9z"
+							/>
+					</g>
+				</g>
+			</g>
+		</g>
+	</g>
+</g>
+</svg>

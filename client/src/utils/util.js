@@ -1,5 +1,27 @@
 import Taro from '@tarojs/taro'
 
+
+// 保存登录信息
+export function setUserInfo(option) {
+  if (option) {
+    Taro.setStorageSync('identity', option.identity)
+    Taro.setStorageSync('id', option.data.id)
+  }
+}
+
+// 清除登录信息
+export function clearUserInfo() {
+  Taro.removeStorageSync('identity')
+  Taro.removeStorageSync('id')
+}
+
+// 获取登录信息
+export function getUserInfo() {
+  const identity = Taro.getStorageSync('identity') || ''
+  const id = Taro.getStorageSync('id') || ''
+  return { identity, id }
+}
+
 // 路由
 function queryFromObjectToString(url, query) {
   let queryStr = ''
@@ -43,8 +65,8 @@ export function showModal({ title, content, showCancel, confirmText, cancelText,
     })
   })
 }
-export function showModalError({ title, content, confirmText, confirmColor, cancelColor }) {
-  return new Promise(function (resolve) {
+export function showModalError({ title, content, confirmText, confirmColor }) {
+  return new Promise(function () {
     Taro.showModal({
       title: title || '错误',
       content: content || '系统繁忙',
