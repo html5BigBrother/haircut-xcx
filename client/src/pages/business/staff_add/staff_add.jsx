@@ -116,6 +116,7 @@ export default class UserEdit extends Component {
         <HalfScreenLayout
           show={layoutShow}
           title='添加员工'
+          footer
           onChangeShow={this.onChangeShow.bind(this)}
           renderFooter={
             <Button className='btn-style btn-purple btn-large btn-circle-44' hoverClass='btn-hover' onClick={this.onClickAdd.bind(this)}>确认</Button>

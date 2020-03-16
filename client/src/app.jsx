@@ -13,11 +13,14 @@ import './app.styl'
 class App extends Component {
   
   componentDidMount () {
+    console.log('env：' + process.env.NODE_ENV)
+    let env = 'dev-6w2bf'
     if (process.env.TARO_ENV === 'weapp') {
       Taro.cloud.init()
     }
+    // if (process.env.NODE_ENV === '') env = 'online-qx7oz'
     Taro.cloud.init({
-      env: 'dev-6w2bf',
+      env,
       traceUser: true    
     })
   }

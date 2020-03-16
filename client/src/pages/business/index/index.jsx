@@ -32,13 +32,15 @@ export default class Index extends Component {
       businessId: '',
       current: 0,
       indexInfo: {
+        hasLoad: false,
         layoutShow: false,
         isOpenedDate: false,
         isOpenedTime: false,
         currentDate: '',
         currentTime: '',
         currentName: '',
-        currentCustomerId: '',
+        currentCustomerName: '',
+        currentCustomerPhone: '',
         currentBarberId: '',
 
         checkList: [],
@@ -77,23 +79,30 @@ export default class Index extends Component {
 
   componentDidHide () { }
 
-  config = {
-    navigationBarTitleText: '快预约',
+  // 下拉刷新
+  async onPullDownRefresh() {
+    await this.switchInfo(this.state.current)
+    Taro.stopPullDownRefresh()
   }
 
-  switchInfo(current) {
+  config = {
+    navigationBarTitleText: '快预约',
+    enablePullDownRefresh: true
+  }
+
+  async switchInfo(current) {
     switch (current) {
       case 0:
-        this.getIndexInfo()
+        await this.getIndexInfo()
         break
       case 1:
-        this.getStaffInfo()
+        await this.getStaffInfo()
         break
       case 2:
-        this.getOrderInfo()
+        await this.getOrderInfo()
         break
       case 3:
-        this.getUserInfo()
+        await this.getUserInfo()
         break
     }
   }
@@ -113,11 +122,26 @@ export default class Index extends Component {
   }
 
   async getIndexInfo() {
-    const { indexInfo, staffInfo, orderInfo, userInfo } = this.state
+    const { userInfo } = this.state
+    const indexInfo = {
+      layoutShow: false,
+      isOpenedDate: false,
+      isOpenedTime: false,
+      currentDate: '',
+      currentTime: '',
+      currentName: '',
+      currentCustomerName: '',
+      currentCustomerPhone: '',
+      currentBarberId: '',
 
-    if (!staffInfo.hasLoad) await this.getStaffInfo()
+      checkList: [],
+      checkList2: [],
+      staffOrderList: [],
+    }
 
-    if (!orderInfo.hasLoad) await this.getOrderInfo()
+    await this.getStaffInfo()
+
+    await this.getOrderInfo()
 
     // 根据营业时间筛选可选时间
     const userInfoNewest = userInfo.hasLoad ? userInfo : await this.getUserInfo()
@@ -138,8 +162,9 @@ export default class Index extends Component {
       }
     })
 
-    this.setState({ indexInfo })
+    indexInfo.hasLoad = true
 
+    this.setState({ indexInfo })
   }
 
   async getStaffInfo() {
@@ -150,6 +175,9 @@ export default class Index extends Component {
     if (!res || res.code !== 'success') return
 
     staffInfo.staffList = res.data || []
+
+    staffInfo.hasLoad = true
+
     this.setState({ staffInfo })
   }
 
@@ -161,6 +189,9 @@ export default class Index extends Component {
     if (!res || res.code !== 'success') return
 
     orderInfo.orderList = res.data || []
+
+    orderInfo.hasLoad = true
+
     if (cb) cb(orderInfo)
     else this.setState({ orderInfo })
   }
@@ -172,7 +203,7 @@ export default class Index extends Component {
     if (!res || res.code !== 'success') return
 
     const { name, openingTime, closingTime, phone, regions, address } = res.data
-    const regionsFilter = regions[0] === regions[1] ? regions.splice(1) : regions
+    const regionsFilter = regions[0] === regions[1] ? regions.slice(1) : regions
     const userInfo = {
       name,
       openingTime,
@@ -183,6 +214,9 @@ export default class Index extends Component {
       businessTime: `${openingTime}-${closingTime}`,
       fullAddress: regionsFilter.join('') + address
     }
+
+    userInfo.hasLoad = true
+
     this.setState({ userInfo })
     return userInfo
   }
@@ -195,10 +229,10 @@ export default class Index extends Component {
 
     // 筛选显示数据
     const currentDate = indexInfo.currentDate
-    const currentTime = indexInfo.currentDate
-    const orderListFilter = orderInfo.orderList.filter(item => item.subscribeDate === currentDate && item.subscribeTime === currentTime)
+    const currentTime = indexInfo.currentTime
+    const orderListFilter = orderInfo.orderList.filter(item => item.subscribeDate === currentDate && item.subscribeTime === currentTime && item.status === 'success')
     indexInfo.staffOrderList = staffInfo.staffList.map(item => {
-      const orderList = orderListFilter.filter(item2 => item2.barberId = item._id)
+      const orderList = orderListFilter.filter(item2 => item2.barberId === item._id)
       return {
         active: true,
         name: item.name,
@@ -207,7 +241,7 @@ export default class Index extends Component {
         orderList
       }
     })
-    this.setState({ indexInfo })
+    this.setState({ indexInfo, staffInfo, orderInfo })
   }
 
   onClickTabBar(value) {
@@ -227,7 +261,7 @@ export default class Index extends Component {
     navigateTo('/pages/business/staff_temperature/staff_temperature')
   }
 
-  // 修改姓名
+  // 修改我的信息
   onClickToUserEdit(type) {
     const { userInfo } = this.state
     if (type === 'businessTime') navigateTo('/pages/business/user_edit_time/user_edit_time', { openingTime: userInfo.openingTime, closingTime: userInfo.closingTime })
@@ -240,7 +274,11 @@ export default class Index extends Component {
     e.stopPropagation()
     const { indexInfo } = this.state
 
+    // 初始化
+    indexInfo.currentCustomerName = ''
+    indexInfo.currentCustomerPhone = ''
     indexInfo.checkList2.forEach(item2 => { item2.checked = false })
+
     indexInfo.currentName = item.name
     indexInfo.currentBarberId = item.barberId
     this.setState({ indexInfo })
@@ -253,7 +291,8 @@ export default class Index extends Component {
     const { businessId, indexInfo } = this.state
     const projects = indexInfo.checkList2.filter(item => item.checked).map(item => item.value)
     const data = {
-      customerId: indexInfo.currentCustomerId,
+      customerName: indexInfo.currentCustomerName,
+      customerPhone: indexInfo.currentCustomerPhone,
       businessId,
       barberId: indexInfo.currentBarberId,
       subscribeDate: indexInfo.currentDate,
@@ -263,8 +302,9 @@ export default class Index extends Component {
     }
 
     const vRes = validate([
-      { type: 'vEmpty', value: indexInfo.currentCustomerId, msg: '请输入手机号码' },
-      { type: 'vTel', value: indexInfo.currentCustomerId, msg: '手机号码格式有误' },
+      { type: 'vEmpty', value: indexInfo.currentCustomerName, msg: '请输入手机号码' },
+      { type: 'vEmpty', value: indexInfo.currentCustomerPhone, msg: '请输入手机号码' },
+      { type: 'vTel', value: indexInfo.currentCustomerPhone, msg: '手机号码格式有误' },
     ])
 
     if (vRes !== true) {
@@ -290,7 +330,7 @@ export default class Index extends Component {
       subscribeId: item._id,
       cancelerType: 'business'
     }
-    if (!(await Taro.showModal({ content: '确认删除吗？' }))) return
+    if (!(await showModal({ content: '确认删除吗？' }))) return
 
     Taro.showLoading({ title: '正在删除', mask: true })
     const res = await cloudRequest({ name: 'cancelSubscribe', data })
@@ -382,7 +422,7 @@ export default class Index extends Component {
             </View>
           </View>
           <View className='sheet2-item-wrap' style='border-bottom: 1px solid f2f2f2;' hoverClass='view-hover' onClick={this.onChangeIsOpenedTime.bind(this, true)}>
-            <View className='sheet2-item' style='border-bottom: 0;'>
+            <View className='sheet2-item'>
               <View className='sheet2-item-name'>选择时间</View>
                 <View className='p-margin-r-20'>{indexInfo.currentTime}</View>
               <AtIcon value='chevron-right' size='14' color='#888'></AtIcon>
@@ -433,6 +473,7 @@ export default class Index extends Component {
         <HalfScreenLayout
           show={indexInfo.layoutShow}
           title='预约'
+          footer
           onChangeShow={this.onChangeShow.bind(this)}
           renderFooter={
             <Button className='btn-style btn-purple btn-large btn-circle-44' hoverClass='btn-hover' onClick={this.onClickAppointSure.bind(this)}>立即预约</Button>
@@ -452,8 +493,12 @@ export default class Index extends Component {
               <Text className='u-input'>{indexInfo.currentTime}</Text>
             </View>
             <View className='u-item'>
+              <View className='u-name'>用户姓名</View>
+              <Input type='number' className='u-input' placeholder='请输入用户姓名' placeholderClass='color-888' maxLength='11' onBlur={this.onChangeInput.bind(this, 'currentCustomerName')} />
+            </View>
+            <View className='u-item'>
               <View className='u-name'>用户手机</View>
-              <Input type='number' className='u-input' placeholder='请输入手机号码' placeholderClass='color-888' maxLength='11' onBlur={this.onChangeInput.bind(this, 'currentCustomerId')} />
+              <Input type='number' className='u-input' placeholder='请输入手机号码' placeholderClass='color-888' maxLength='11' onBlur={this.onChangeInput.bind(this, 'currentCustomerPhone')} />
             </View>
             <View className='u-project'>
               <View className='u-project-name'>项目</View>
@@ -495,11 +540,11 @@ export default class Index extends Component {
       <View className='p-section-order'>
         {
           orderInfo.orderList.map((item) =>
-            <View className='p-item-card' key={item.id}>
+            <View className='p-item-card' key={item._id}>
               <View className='u-item-form'>
                 <View className='u-item-form-name'>流水号：</View>
                 <View className='u-item-form-val flex-1'>{item.serialNumber}</View>
-                <View style='color: #2A9FFF;'>{item.status === 'success' ? '已预约': '已取消'}</View>
+                <View className={item.status === 'success' ? 'color-b' : 'color-r'}>{item.status === 'success' ? '已预约': '已取消'}</View>
               </View>
               <View className='u-item-form'>
                 <View className='u-item-form-name'>客户：</View>

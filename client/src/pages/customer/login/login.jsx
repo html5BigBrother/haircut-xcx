@@ -4,7 +4,7 @@ import { AtMessage } from 'taro-ui'
 import './login.styl'
 
 import validate from '../../../utils/validate'
-import { navigateTo } from '../../../utils/util'
+import { reLaunch, setUserInfo } from '../../../utils/util'
 import cloudRequest from '../../../utils/request_cloud'
 
 import icon_logo from '../../../static/imgs/icon_logo.svg'
@@ -19,21 +19,6 @@ export default class Login extends Component {
       layoutShow: false,
       name: '',
       phone: '',
-      // show: true,
-      // buttons: [
-      //   {
-      //     type: 'default',
-      //     className: '',
-      //     text: '辅助操作',
-      //     value: 0
-      //   },
-      //   {
-      //       type: 'primary',
-      //       className: '',
-      //       text: '主操作',
-      //       value: 1
-      //   }
-      // ]
     }
   }
 
@@ -51,12 +36,9 @@ export default class Login extends Component {
     navigationBarTitleText: '登录',
   }
 
-  onClickLogin() {
-    cloudRequest({ name: 'customerRegiste', data: { name: '天宇测试1', phone: '15757179449' } })
-
-    // Taro.navigateTo({ url: '/pages/customer/index/index' })
-
-  }
+  // onClickLogin() {
+  //   cloudRequest({ name: 'customerRegiste', data: { name: '天宇测试1', phone: '15757179449' } })
+  // }
 
   async onClickRegister() {
     const { name, phone } = this.state
@@ -72,8 +54,13 @@ export default class Login extends Component {
       return
     }
 
-    const res = await cloudRequest({ name: 'customerRegiste ', data })
+    Taro.showLoading({ title: '加载中', mask: true })
+    const res = await cloudRequest({ name: 'customerRegiste', data })
+    Taro.hideLoading()
     if (!res || res.code !== 'success') return
+    setUserInfo({ identity: 'business', data: res.data })
+
+    reLaunch('/pages/customer/index/index')
   }
 
   onChangeShow(layoutShow) {
@@ -95,15 +82,16 @@ export default class Login extends Component {
             <View className='u-logo-text'>快预约</View>
           </View>
           <Button className='btn-style btn-primary u-btn' hoverClass='btn-hover' onClick={this.onChangeShow.bind(this, true)}>手机号登录</Button>
-          <Button className='btn-style btn-default u-btn' hoverClass='btn-hover'>取消</Button>
+          <Button className='btn-style btn-default u-btn' hoverClass='btn-hover' onClick={Taro.navigateBack}>取消</Button>
         </View>
         <View>
           <HalfScreenLayout
             show={layoutShow}
             title='注册'
+            footer
             onChangeShow={this.onChangeShow.bind(this)}
             renderFooter={
-              <Button className='btn-style btn-purple btn-large btn-circle-44' hoverClass='btn-hover' onClick={this.onClickRegister.bind(this)}>注册</Button>
+              <Button className='btn-style btn-orange btn-large btn-circle-44' hoverClass='btn-hover' onClick={this.onClickRegister.bind(this)}>注册</Button>
             }
           >
             <View className='p-form'>

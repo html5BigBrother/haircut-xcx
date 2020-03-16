@@ -42,12 +42,20 @@ export default class Index extends Component {
     }
   }
 
-  onClickCustomer() {
-    navigateTo('/pages/customer/login/login')
+  async onClickCustomer() {
+    // navigateTo('/pages/customer/login/login')
+    Taro.showLoading({ title: '加载中', mask: true })
+    const res = await cloudRequest({ name: 'autoLogin', data: { type: 'customer' }, errorTips: false })
+    Taro.hideLoading()
+    if (res.code === 'success') {
+      setUserInfo({ identity: 'customer', data: res.data })
+      reLaunch('/pages/customer/index/index')
+    } else {
+      navigateTo('/pages/customer/login/login')
+    }
   }
 
   render () {
-    console.log(process.env.NODE_ENV)
     return (
       <View className='p-page'>
         <View className='p-contain'>

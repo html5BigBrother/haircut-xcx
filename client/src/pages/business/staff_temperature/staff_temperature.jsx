@@ -92,8 +92,12 @@ export default class UserEdit extends Component {
       temperature,
       date: new Date().toLocaleDateString().replace(/(\/)/g, '-')
     }
+    validate.methods['vTemperature'] = (v) => {
+      return Number(v) <= 42 && Number(v) >= 35
+    }
     const vRes = validate([
       { type: 'vEmpty', value: temperature, msg: '体温不能为空' },
+      { type: 'vTemperature', value: temperature, msg: '体温超出正常范围，重新输入' },
     ])
     if (vRes !== true) {
       Taro.atMessage({ 'message': vRes, 'type': 'error', })
@@ -143,6 +147,7 @@ export default class UserEdit extends Component {
         <HalfScreenLayout
           show={layoutShow}
           title='添加体温'
+          footer
           onChangeShow={this.onChangeShow.bind(this)}
           renderFooter={
             <Button className='btn-style btn-purple btn-large btn-circle-44' hoverClass='btn-hover' onClick={this.onClickAdd.bind(this)}>确认</Button>
@@ -151,7 +156,7 @@ export default class UserEdit extends Component {
           <View className='p-form'>
             <View className='u-item'>
               <View className='u-name'>体温</View>
-              <Input type='number' className='u-input' placeholder='请输入体温' placeholderClass='color-888' maxLength='20' value={addInfo.temperature} onBlur={this.onChangeInput.bind(this, 'temperature')} />
+              <Input type='digit' className='u-input' placeholder='请输入体温' placeholderClass='color-888' maxLength='20' value={addInfo.temperature} onBlur={this.onChangeInput.bind(this, 'temperature')} />
             </View>
           </View>
         </HalfScreenLayout>

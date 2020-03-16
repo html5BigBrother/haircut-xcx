@@ -61,7 +61,6 @@ export default class UserEdit extends Component {
         temperatureAllList.push(obj)
       }
     })
-    debugger
     // 根据时间逆序
     temperatureAllList.sort((a, b) => {
      return new Date(b.date) - new Date(a.date)

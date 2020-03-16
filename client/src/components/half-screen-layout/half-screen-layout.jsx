@@ -9,6 +9,7 @@ import './half-screen-layout.styl'
 
 show 控制显示隐藏
 title 标题
+footer 是否显示footer
 onChangeShow 改变父组件show
 
 */
@@ -16,6 +17,7 @@ onChangeShow 改变父组件show
 const defaultProps = {
   show: false,
   title: '',
+  footer: false
 }
 
 class HalfScreenLayout extends Component {
@@ -28,7 +30,7 @@ class HalfScreenLayout extends Component {
   static externalClasses = ['layout-class']
 
   render () {
-    const { show, title } = this.props
+    const { show, title, footer } = this.props
     return (
       <View className={`layout-warp layout-class ${show ? 'layout-show' : ''}`}>
         <View className='layout-mask' onClick={() => { this.props.onChangeShow(false) }}></View>
@@ -36,7 +38,7 @@ class HalfScreenLayout extends Component {
           { title && <View className='layout-container-title'>{title}</View>}
           <View className='layout-close' onClick={() => { this.props.onChangeShow(false) }}><AtIcon color='#888888' value='close-circle'></AtIcon></View>
           <View className='layout-container-body'>{this.props.children}</View>
-          <View className='layout-container-footer'>{this.props.renderFooter}</View>
+          { footer && <View className='layout-container-footer'>{this.props.renderFooter}</View> }
         </View>
       </View>
     )

@@ -1,9 +1,7 @@
 import Taro from '@tarojs/taro'
 import { showModalError } from './util'
 
-function validateResCode(code) {
-
-}
+function validateResCode(code) {}
 
 export default function cloudRequest({ name, data = {}, errorTips = true }) {
   return new Promise(function (resolve) {
